@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8fa;
+  --foreground: #121826;
+  --surface: #fdfdfd;
+  --surface-strong: #f1f4f8;
+  --muted: #677489;
+  --line: rgba(18, 24, 38, 0.08);
+  --brand: #121826;
+  --brand-deep: #0b1324;
+  --accent: #3563e9;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-accent: var(--accent);
+  --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", "SF Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f1218;
+    --foreground: #f6f8fb;
+    --surface: #171c24;
+    --surface-strong: #1e2530;
+    --muted: #b6c0cf;
+    --line: rgba(246, 248, 251, 0.08);
+    --brand: #f6f8fb;
+    --brand-deep: #0f1218;
+    --accent: #77a0ff;
+  }
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(53, 99, 233, 0.09), transparent 25%),
+    radial-gradient(circle at top right, rgba(18, 24, 38, 0.03), transparent 28%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+a,
+button,
+input,
+select {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand) 30%, transparent);
+}
+
+.card-shadow {
+  box-shadow:
+    0 1px 2px rgba(18, 24, 38, 0.03),
+    0 18px 40px rgba(18, 24, 38, 0.05);
+}
