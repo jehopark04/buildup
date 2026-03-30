@@ -35,6 +35,11 @@ export type Track = (typeof trackOptions)[number]["value"];
 export type Grade = (typeof gradeOptions)[number]["value"];
 export type Level = (typeof levelOptions)[number]["value"];
 export type ActivityType = (typeof activityTypeOptions)[number]["value"];
+export type RecommendationInputState =
+  | "missingTrack"
+  | "trackOnly"
+  | "partial"
+  | "precise";
 
 export type UserProfile = {
   track: Track | null;
@@ -140,6 +145,32 @@ export function hasCompleteProfile(
   level: Level;
 } {
   return Boolean(profile.track && profile.grade && profile.level);
+}
+
+export function hasRecommendationTrack(
+  profile: UserProfile,
+): profile is UserProfile & {
+  track: Track;
+} {
+  return Boolean(profile.track);
+}
+
+export function getRecommendationInputState(
+  profile: UserProfile,
+): RecommendationInputState {
+  if (!profile.track) {
+    return "missingTrack";
+  }
+
+  if (profile.grade && profile.level) {
+    return "precise";
+  }
+
+  if (profile.grade || profile.level) {
+    return "partial";
+  }
+
+  return "trackOnly";
 }
 
 export function getTrackLabel(value: Track | null) {

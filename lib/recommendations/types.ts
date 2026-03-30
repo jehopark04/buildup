@@ -4,6 +4,10 @@ import type { ActivityType } from "@/lib/profile";
 export type RecommendationTier = "best" | "conditional" | "notNow";
 export type FitState = "fit" | "near" | "far" | "unknown";
 export type RecommendationConfidence = "high" | "medium" | "low";
+export type RecommendationDecisionLimiter =
+  | "confidence"
+  | "maxAllowedTier"
+  | "blocked";
 
 export type RecommendationFit = {
   gradeFit: FitState;
@@ -22,7 +26,9 @@ export type RecommendationBreakdown = {
   rawScore: number;
   confidence: RecommendationConfidence;
   rawTier: RecommendationTier;
+  confidenceTier: RecommendationTier;
   finalTier: RecommendationTier;
+  limitedBy: RecommendationDecisionLimiter[];
   constraints?: RecommendationConstraints;
 };
 
@@ -32,11 +38,19 @@ export type RecommendationConstraints = {
   notes: string[];
 };
 
+export type RecommendationDecision = {
+  rawTier: RecommendationTier;
+  confidenceTier: RecommendationTier;
+  finalTier: RecommendationTier;
+  limitedBy: RecommendationDecisionLimiter[];
+};
+
 export type RecommendationResult = {
   score: number;
   confidence: RecommendationConfidence;
   rawTier: RecommendationTier;
   finalTier: RecommendationTier;
+  decision: RecommendationDecision;
   reasons: string[];
   breakdown: RecommendationBreakdown;
   constraints?: RecommendationConstraints;
@@ -47,6 +61,7 @@ export type RecommendationMatch = Activity & {
   confidence: RecommendationResult["confidence"];
   rawTier: RecommendationResult["rawTier"];
   finalTier: RecommendationResult["finalTier"];
+  decision: RecommendationResult["decision"];
   reasons: RecommendationResult["reasons"];
   breakdown: RecommendationResult["breakdown"];
   constraints?: RecommendationResult["constraints"];

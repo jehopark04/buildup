@@ -26,15 +26,15 @@ export default async function OnboardingPage({
           활동 우선순위를 나눠서 보여줍니다.
         </h1>
         <p className="max-w-xl text-base leading-7 text-muted">
-          빌드업은 많은 정보를 요구하지 않습니다. 지금 단계에서 실제 추천 결과를 바꾸는 항목만 받아서 흐름을 단순하게 유지합니다.
+          빌드업은 많은 정보를 요구하지 않습니다. 희망 직무만 있으면 기본 추천을 만들고, 학년과 현재 수준까지 있으면 더 정밀하게 나눕니다.
         </p>
         <div className="space-y-3 rounded-[30px] border border-line bg-surface p-5">
           <p className="text-sm font-semibold text-foreground">
             이 화면에서 입력하는 정보
           </p>
           <ul className="space-y-2 text-sm leading-6 text-muted">
-            <li>희망 직무: 어떤 방향으로 경험을 쌓을지</li>
-            <li>학년 / 현재 수준: 지금 붙이면 효율적인 활동인지 판단</li>
+            <li>희망 직무: 필수, 어떤 방향으로 경험을 쌓을지</li>
+            <li>학년 / 현재 수준: 선택, 입력할수록 추천이 더 정밀해짐</li>
             <li>관심 활동 유형: 전체로 두거나, 선호 형식만 약하게 반영</li>
             <li>추천 기준: 직무 필터 후 학년 / 수준 중심으로 나눔</li>
           </ul>

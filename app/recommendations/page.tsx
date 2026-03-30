@@ -5,8 +5,10 @@ import { kauShortcutLinks } from "@/lib/kau-links";
 import {
   buildProfileFromSearchParams,
   buildProfileSearchParams,
+  getRecommendationInputState,
   getProfileSummary,
   getTrackLabel,
+  hasRecommendationTrack,
   hasCompleteProfile,
 } from "@/lib/profile";
 import { getRecommendationSections } from "@/lib/recommendations";
@@ -23,13 +25,20 @@ export default async function RecommendationsPage({
   searchParams,
 }: RecommendationsPageProps) {
   const profile = buildProfileFromSearchParams(await searchParams);
-  const ready = hasCompleteProfile(profile);
+  const hasTrack = hasRecommendationTrack(profile);
+  const ready = hasTrack;
+  const isPrecise = hasCompleteProfile(profile);
+  const inputState = getRecommendationInputState(profile);
   const profileQuery = buildProfileSearchParams(profile);
   const editHref = (
     profileQuery ? `/onboarding?${profileQuery}` : "/onboarding"
   ) as Route;
   const sections = ready ? getRecommendationSections(profile) : [];
   const trackLabel = getTrackLabel(profile.track);
+  const missingDetails = [
+    !profile.grade ? "학년" : null,
+    !profile.level ? "현재 수준" : null,
+  ].filter((item): item is string => Boolean(item));
   const groupedLinks = kauShortcutLinks.reduce<Record<string, typeof kauShortcutLinks>>(
     (accumulator, link) => {
       const current = accumulator[link.group] ?? [];
@@ -38,18 +47,55 @@ export default async function RecommendationsPage({
     },
     {},
   );
+  const heroByState = {
+    missingTrack: {
+      badge: "추천 준비 전",
+      title: "직무를 먼저 고르면\n추천을 시작할 수 있어요.",
+      description:
+        "빌드업은 희망 직무를 기준으로 관련 활동만 먼저 추립니다. 직무가 없으면 추천을 시작할 수 없습니다.",
+    },
+    trackOnly: {
+      badge: "기본 추천",
+      title: `${trackLabel} 관련 활동을\n먼저 추렸습니다.`,
+      description:
+        "지금은 희망 직무만 반영한 기본 추천입니다. 학년과 현재 수준을 넣으면 더 정밀하게 다시 나눕니다.",
+    },
+    partial: {
+      badge: "부분 입력 추천",
+      title: `${trackLabel} 관련 활동을\n부분 입력 기준으로 정리했습니다.`,
+      description:
+        "입력된 정보만 반영해 먼저 정리했습니다. 학년과 현재 수준을 모두 채우면 추천 신뢰도가 더 올라갑니다.",
+    },
+    precise: {
+      badge: "정밀 추천",
+      title: `${trackLabel} 관련 활동만\n학년과 수준 기준으로 나눴습니다.`,
+      description:
+        "직무 필터 후 학년과 현재 수준을 함께 반영해 추천 / 조건부 추천 / 비추천을 정리했습니다.",
+    },
+  } as const;
+  const hero = heroByState[inputState];
+  const confidenceCopy =
+    inputState === "precise"
+      ? "추천 신뢰도 높음"
+      : inputState === "partial"
+        ? "추천 신뢰도 중간"
+        : inputState === "trackOnly"
+          ? "추천 신뢰도 낮음"
+          : "직무 입력 필요";
 
   return (
     <main className="space-y-8">
       <section className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr]">
         <div className="card-shadow rounded-[30px] border border-line bg-surface p-6">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
-            BuildUp Result
+            {hero.badge}
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">
-            {ready ? `${trackLabel} 관련 활동만` : "직무를 먼저 고르면"}
-            <br />
-            학년과 수준 기준으로 다시 나눕니다.
+            {hero.title.split("\n").map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
           </h1>
           <div className="mt-6 space-y-3">
             {getProfileSummary(profile).map((item) => (
@@ -62,7 +108,13 @@ export default async function RecommendationsPage({
             ))}
           </div>
           <div className="mt-6 rounded-2xl bg-surface-strong p-4 text-sm leading-6 text-muted">
-            직무는 먼저 필터로 쓰고, 실제 추천 / 조건부 추천 / 비추천은 학년과 현재 수준 중심으로 나눕니다.
+            <p>{hero.description}</p>
+            <p className="mt-3 font-medium text-foreground">{confidenceCopy}</p>
+            {!isPrecise && hasTrack ? (
+              <p className="mt-2">
+                {missingDetails.join(", ")} 정보를 더 입력하면 결과 순서와 설명이 더 정확해집니다.
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -108,10 +160,10 @@ export default async function RecommendationsPage({
       {!ready ? (
         <section className="card-shadow rounded-[30px] border border-dashed border-line bg-surface p-8">
           <h2 className="text-2xl font-semibold tracking-tight">
-            추천에 필요한 정보가 아직 부족합니다.
+            희망 직무를 먼저 골라야 추천할 수 있습니다.
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-            희망 직무, 학년, 현재 수준은 최소한 있어야 의미 있는 추천 구간을 나눌 수 있습니다.
+            학년과 현재 수준은 나중에 채워도 되지만, 직무는 있어야 관련 활동만 먼저 추릴 수 있습니다.
           </p>
           <Link
             href="/onboarding"
@@ -137,6 +189,27 @@ export default async function RecommendationsPage({
         </section>
       ) : (
         <div className="space-y-10">
+          {!isPrecise ? (
+            <section className="card-shadow rounded-[30px] border border-dashed border-line bg-white p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
+                Recommendation Tone
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight">
+                지금은 {inputState === "trackOnly" ? "기본 추천" : "부분 입력 추천"}으로 보고 있습니다.
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+                {inputState === "trackOnly"
+                  ? "희망 직무만으로 관련 활동을 먼저 추렸습니다. 학년과 현재 수준을 추가하면 추천 / 조건부 추천 / 비추천의 경계가 더 정확해집니다."
+                  : `${missingDetails.join(", ")} 정보가 빠져 있어 일부 조건만 반영했습니다. 남은 정보를 채우면 추천 신뢰도와 이유 설명이 더 또렷해집니다.`}
+              </p>
+              <Link
+                href={editHref}
+                className="mt-6 inline-flex rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white"
+              >
+                정밀 추천으로 바꾸기
+              </Link>
+            </section>
+          ) : null}
           {sections.map((section) => {
             const isBestRow = section.tier === "best";
 

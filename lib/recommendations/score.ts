@@ -45,7 +45,9 @@ export function getRecommendationScoreResult(
       rawScore,
       confidence,
       rawTier: "notNow",
+      confidenceTier: "notNow",
       finalTier: "notNow",
+      limitedBy: [],
     } satisfies RecommendationBreakdown,
   };
 }

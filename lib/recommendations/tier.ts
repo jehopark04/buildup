@@ -6,6 +6,7 @@ import {
 } from "./constants/tier";
 import type {
   RecommendationConfidence,
+  RecommendationDecision,
   RecommendationConstraints,
   RecommendationTier,
 } from "./types";
@@ -56,4 +57,31 @@ export function applyConfidenceCap(
 
 export function getRecommendationTierLabel(tier: RecommendationTier) {
   return tierLabelMap[tier];
+}
+
+export function buildRecommendationDecision(
+  rawTier: RecommendationTier,
+  confidence: RecommendationConfidence,
+  constraints?: RecommendationConstraints,
+): RecommendationDecision {
+  const confidenceTier = applyConfidenceCap(rawTier, confidence);
+  const finalTier = applyTierConstraints(confidenceTier, constraints);
+  const limitedBy: RecommendationDecision["limitedBy"] = [];
+
+  if (confidenceTier !== rawTier) {
+    limitedBy.push("confidence");
+  }
+
+  if (constraints?.blocked) {
+    limitedBy.push("blocked");
+  } else if (constraints?.maxAllowedTier && finalTier !== confidenceTier) {
+    limitedBy.push("maxAllowedTier");
+  }
+
+  return {
+    rawTier,
+    confidenceTier,
+    finalTier,
+    limitedBy,
+  };
 }

@@ -48,6 +48,8 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
     });
   }
 
+  const isPreciseRecommendation = Boolean(track && grade && level);
+
   return (
     <form
       action="/recommendations"
@@ -84,47 +86,51 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
 
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-accent">02</p>
-            <h2 className="text-xl font-semibold tracking-tight">학년</h2>
-          </div>
-          <select
-            name="grade"
-            required
-            value={grade}
-            onChange={(event) => setGrade(event.target.value)}
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-accent"
-          >
-            <option value="" disabled>
-              현재 학년을 선택하세요
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-accent">02</p>
+          <h2 className="text-xl font-semibold tracking-tight">학년 선택</h2>
+          <p className="text-sm leading-6 text-muted">
+            선택 항목입니다. 넣으면 추천 구간이 더 정교해집니다.
+          </p>
+        </div>
+        <select
+          name="grade"
+          value={grade}
+          onChange={(event) => setGrade(event.target.value)}
+          className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-accent"
+        >
+          <option value="">
+            선택 안 함
+          </option>
+          {gradeOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
-            {gradeOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
             ))}
           </select>
         </div>
 
         <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-accent">03</p>
-            <h2 className="text-xl font-semibold tracking-tight">현재 수준</h2>
-          </div>
-          <select
-            name="level"
-            required
-            value={level}
-            onChange={(event) => setLevel(event.target.value)}
-            className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-accent"
-          >
-            <option value="" disabled>
-              지금 어느 단계인지 선택하세요
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-accent">03</p>
+          <h2 className="text-xl font-semibold tracking-tight">현재 수준</h2>
+          <p className="text-sm leading-6 text-muted">
+            선택 항목입니다. 실제로 도전 가능한 단계인지 더 정확해집니다.
+          </p>
+        </div>
+        <select
+          name="level"
+          value={level}
+          onChange={(event) => setLevel(event.target.value)}
+          className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-accent"
+        >
+          <option value="">
+            선택 안 함
+          </option>
+          {levelOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
-            {levelOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
             ))}
           </select>
         </div>
@@ -160,13 +166,13 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
 
       <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-muted">
-          빌드업은 직무를 먼저 좁히고, 학년과 현재 수준으로 추천 / 조건부 추천 / 비추천을 나눕니다.
+          희망 직무만 입력해도 기본 추천은 볼 수 있고, 학년과 현재 수준까지 입력하면 정밀 추천으로 다시 나눕니다.
         </p>
         <button
           type="submit"
           className="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white hover:-translate-y-0.5 hover:bg-brand/92"
         >
-          추천 결과 보기
+          {isPreciseRecommendation ? "정밀 추천 보기" : "기본 추천 보기"}
         </button>
       </div>
     </form>

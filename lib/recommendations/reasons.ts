@@ -9,7 +9,14 @@ import type {
   RecommendationConfidence,
   RecommendationFit,
   RecommendationResult,
+  RecommendationTier,
 } from "./types";
+
+export type RecommendationReasonParts = {
+  constraintReason: string | null;
+  primaryReason: string | null;
+  supportingReasons: string[];
+};
 
 function getGradeReason(
   activity: Activity,
@@ -67,53 +74,113 @@ function getStatusReason(activity: Activity) {
   return `상시 확인형 채널이라 ${formatVerifiedDate(activity.lastVerifiedAt)} 기준 링크를 저장해 두는 편이 좋습니다.`;
 }
 
+function trimPeriod(text: string) {
+  return text.replace(/[.]$/u, "");
+}
+
+function getStageReason(
+  activity: Activity,
+  profile: UserProfile,
+  fit: RecommendationFit,
+  levelScore: number,
+  gradeScore: number,
+) {
+  if (fit.gradeFit === "unknown" && fit.levelFit === "unknown") {
+    return "학년과 현재 수준 정보가 모두 없어 단계 적합도는 보수적으로만 봤습니다.";
+  }
+
+  if (fit.gradeFit === "unknown" && fit.levelFit !== "unknown") {
+    return "현재 수준은 반영했지만 학년 정보가 없어 단계 적합도는 보수적으로만 봤습니다.";
+  }
+
+  if (fit.levelFit === "unknown" && fit.gradeFit !== "unknown") {
+    return "학년은 반영했지만 현재 수준 정보가 없어 단계 적합도는 보수적으로만 봤습니다.";
+  }
+
+  if (fit.gradeFit === "fit" && fit.levelFit === "fit") {
+    return "학년과 현재 수준이 모두 잘 맞습니다.";
+  }
+
+  if (fit.gradeFit === "near" && fit.levelFit === "near") {
+    return "학년과 현재 수준이 모두 한 단계 정도 차이납니다.";
+  }
+
+  if (fit.levelFit === "far") {
+    return trimPeriod(getLevelReason(activity, profile, fit.levelFit));
+  }
+
+  if (fit.gradeFit === "far") {
+    return trimPeriod(getGradeReason(activity, profile, fit.gradeFit));
+  }
+
+  if (levelScore >= gradeScore) {
+    return trimPeriod(getLevelReason(activity, profile, fit.levelFit));
+  }
+
+  return trimPeriod(getGradeReason(activity, profile, fit.gradeFit));
+}
+
+function getTierConclusion(tier: RecommendationTier) {
+  if (tier === "best") {
+    return "그래서 현재 입력 기준 가장 추천입니다.";
+  }
+
+  if (tier === "conditional") {
+    return "그래서 현재 입력 기준 조건부 추천입니다.";
+  }
+
+  return "그래서 현재 입력 기준 지금은 비추천입니다.";
+}
+
+function withoutLeadingConnector(text: string) {
+  return text.replace(/^그래서\s/u, "");
+}
+
+function getConstraintReason(
+  decision: RecommendationResult["decision"],
+  constraints: RecommendationResult["constraints"],
+) {
+  const primaryConstraintNote = constraints?.notes[0] ?? null;
+
+  if (decision.limitedBy.includes("blocked")) {
+    return primaryConstraintNote
+      ? `${primaryConstraintNote} ${getTierConclusion(decision.finalTier)}`
+      : `현재 지원 가능 조건을 충족하지 못해 ${withoutLeadingConnector(getTierConclusion(decision.finalTier))}`;
+  }
+
+  if (decision.limitedBy.includes("maxAllowedTier")) {
+    return primaryConstraintNote
+      ? `${primaryConstraintNote} ${getTierConclusion(decision.finalTier)}`
+      : `활동 권장 조건을 반영해 ${withoutLeadingConnector(getTierConclusion(decision.finalTier))}`;
+  }
+
+  if (decision.limitedBy.includes("confidence")) {
+    return `입력 정보가 부족해 ${withoutLeadingConnector(getTierConclusion(decision.finalTier))}`;
+  }
+
+  return null;
+}
+
 function getPrimaryReason(
   activity: Activity,
   profile: UserProfile,
   fit: RecommendationFit,
-  result: Pick<RecommendationResult, "breakdown">,
+  result: Pick<RecommendationResult, "breakdown" | "decision">,
+  hasConstraintReason: boolean,
 ) {
-  if (fit.gradeFit === "unknown" && fit.levelFit === "unknown") {
-    return "학년과 현재 수준 정보가 모두 없어 추천 신뢰도가 낮습니다.";
+  const stageReason = getStageReason(
+    activity,
+    profile,
+    fit,
+    result.breakdown.levelScore,
+    result.breakdown.gradeScore,
+  );
+
+  if (hasConstraintReason) {
+    return stageReason;
   }
 
-  if (fit.gradeFit === "unknown" && fit.levelFit !== "unknown") {
-    return `현재 수준은 반영했지만 학년 정보가 없어 ${result.breakdown.confidence === "medium" ? "보수적으로" : ""} 추천했습니다.`;
-  }
-
-  if (fit.levelFit === "unknown" && fit.gradeFit !== "unknown") {
-    return `학년은 반영했지만 현재 수준 정보가 없어 ${result.breakdown.confidence === "medium" ? "보수적으로" : ""} 추천했습니다.`;
-  }
-
-  if (fit.gradeFit === "fit" && fit.levelFit === "fit") {
-    return "학년과 현재 수준이 모두 맞아 가장 추천입니다.";
-  }
-
-  if (fit.gradeFit === "near" && fit.levelFit === "near") {
-    return "학년과 현재 수준이 모두 한 단계 차이라 준비하면 도전 가능한 조건부 추천입니다.";
-  }
-
-  if (fit.gradeFit === "fit" && fit.levelFit === "near") {
-    return `학년은 맞지만 ${getLevelReason(activity, profile, fit.levelFit)?.replaceAll(".", "")} 조건부 추천입니다.`;
-  }
-
-  if (fit.gradeFit === "near" && fit.levelFit === "fit") {
-    return `현재 수준은 맞지만 ${getGradeReason(activity, profile, fit.gradeFit)?.replaceAll(".", "")} 조건부 추천입니다.`;
-  }
-
-  if (fit.levelFit === "far") {
-    return `${getLevelReason(activity, profile, fit.levelFit)} 지금은 비추천입니다.`;
-  }
-
-  if (fit.gradeFit === "far") {
-    return `${getGradeReason(activity, profile, fit.gradeFit)} 지금은 비추천입니다.`;
-  }
-
-  if (result.breakdown.levelScore >= result.breakdown.gradeScore) {
-    return getLevelReason(activity, profile, fit.levelFit);
-  }
-
-  return getGradeReason(activity, profile, fit.gradeFit);
+  return `${stageReason} ${getTierConclusion(result.decision.finalTier)}`;
 }
 
 function getConfidenceReason(confidence: RecommendationConfidence) {
@@ -128,27 +195,41 @@ function getConfidenceReason(confidence: RecommendationConfidence) {
   return "입력 정보가 부족해 추천 신뢰도는 낮은 편입니다.";
 }
 
-export function getRecommendationReasons(
+export function getRecommendationReasonParts(
   activity: Activity,
   profile: UserProfile,
   fit: RecommendationFit,
-  result: Pick<RecommendationResult, "breakdown" | "constraints">,
-) {
-  const reasons = [
-    getPrimaryReason(activity, profile, fit, {
-      breakdown: result.breakdown,
-    }),
-    getConfidenceReason(result.breakdown.confidence),
+  result: Pick<RecommendationResult, "breakdown" | "constraints" | "decision">,
+): RecommendationReasonParts {
+  const constraintReason = getConstraintReason(result.decision, result.constraints);
+  const usedConstraintNotes = constraintReason
+    ? result.constraints?.notes.slice(0, 1) ?? []
+    : [];
+  const primaryReason = getPrimaryReason(
+    activity,
+    profile,
+    fit,
+    result,
+    Boolean(constraintReason),
+  );
+  const supportingReasons = [
+    result.decision.limitedBy.includes("confidence")
+      ? null
+      : getConfidenceReason(result.breakdown.confidence),
     fit.typeMatched
       ? "관심 활동 유형과도 맞아 같은 tier 안에서는 우선순위를 높였습니다."
       : getStatusReason(activity),
+    ...(
+      result.constraints?.blocked ||
+      result.breakdown.rawTier !== result.breakdown.finalTier
+        ? result.constraints?.notes.filter((note) => !usedConstraintNotes.includes(note)) ?? []
+        : []
+    ),
   ].filter((reason): reason is string => Boolean(reason));
 
-  const constraintNotes =
-    result.constraints?.blocked ||
-    result.breakdown.rawTier !== result.breakdown.finalTier
-      ? result.constraints?.notes.filter((note) => !reasons.includes(note)) ?? []
-      : [];
-
-  return [...reasons, ...constraintNotes];
+  return {
+    constraintReason,
+    primaryReason,
+    supportingReasons,
+  };
 }

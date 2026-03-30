@@ -28,8 +28,8 @@ export default function HomePage() {
             빌드업이 먼저 좁혀줄게.
           </h1>
           <p className="mx-auto max-w-2xl text-base leading-7 text-muted sm:text-lg">
-            희망 직무, 학년, 현재 수준, 관심 활동 유형만 알려주면
-            지금 바로 볼 카드와 아직은 미뤄도 되는 카드를 한 번에 정리해 줍니다.
+            희망 직무만 알려줘도 기본 추천은 시작할 수 있고,
+            학년과 현재 수준까지 넣으면 더 정밀하게 우선순위를 나눠줍니다.
           </p>
         </div>
 
@@ -38,7 +38,7 @@ export default function HomePage() {
           className="card-shadow mx-auto block max-w-3xl rounded-[34px] border border-line bg-white px-6 py-6 text-left hover:border-foreground/12"
         >
           <div className="text-lg font-medium text-muted">
-            예: 백엔드 3학년이고 프로젝트 경험이 있어요.
+            예: 백엔드를 희망하고, 가능하면 학년과 현재 수준도 같이 알려주세요.
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
             {["희망 직무", "학년", "현재 수준", "관심 활동 유형"].map((item) => (
@@ -52,7 +52,7 @@ export default function HomePage() {
           </div>
           <div className="mt-6 flex items-center justify-between gap-4">
             <p className="text-sm leading-6 text-muted">
-              입력은 1분 내로 끝납니다. 한국항공대 학생 기준으로 공식 활동 채널과 함께 보여줍니다.
+              직무는 필수, 학년과 현재 수준은 선택입니다. 입력이 많을수록 추천 신뢰도가 올라갑니다.
             </p>
             <span className="rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white">
               시작하기
@@ -62,9 +62,9 @@ export default function HomePage() {
 
         <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted">
           <span>빌드업이 물어보는 것</span>
-          <span className="rounded-full border border-line px-3 py-1.5">희망 직무</span>
-          <span className="rounded-full border border-line px-3 py-1.5">학년</span>
-          <span className="rounded-full border border-line px-3 py-1.5">현재 수준</span>
+          <span className="rounded-full border border-line px-3 py-1.5">희망 직무 필수</span>
+          <span className="rounded-full border border-line px-3 py-1.5">학년 선택</span>
+          <span className="rounded-full border border-line px-3 py-1.5">현재 수준 선택</span>
         </div>
 
         <div className="pt-2">

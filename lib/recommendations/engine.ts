@@ -2,11 +2,10 @@ import { activityCatalog } from "@/lib/activities";
 import type { UserProfile } from "@/lib/profile";
 import { getRecommendationEligibility } from "./eligibility";
 import { getRecommendationFit } from "./fit";
-import { getRecommendationReasons } from "./reasons";
+import { getRecommendationReasonParts } from "./reasons";
 import { getRecommendationScoreResult, sortRecommendationMatches } from "./score";
 import {
-  applyConfidenceCap,
-  applyTierConstraints,
+  buildRecommendationDecision,
   getRawTierFromScore,
 } from "./tier";
 import type { RecommendationMatch } from "./types";
@@ -18,31 +17,43 @@ function buildRecommendationMatch(
   const fit = getRecommendationFit(profile, activity);
   const scoreResult = getRecommendationScoreResult(activity, fit);
   const rawTier = getRawTierFromScore(scoreResult.score);
-  const confidenceTier = applyConfidenceCap(rawTier, scoreResult.confidence);
   const constraints = getRecommendationEligibility(profile, activity);
-  const finalTier = applyTierConstraints(confidenceTier, constraints);
+  const decision = buildRecommendationDecision(
+    rawTier,
+    scoreResult.confidence,
+    constraints,
+  );
   const breakdown = {
     ...scoreResult.breakdown,
-    rawTier,
-    finalTier,
+    rawTier: decision.rawTier,
+    confidenceTier: decision.confidenceTier,
+    finalTier: decision.finalTier,
+    limitedBy: decision.limitedBy,
     constraints,
   };
 
-  const reasons = getRecommendationReasons(activity, profile, fit, {
+  const reasonParts = getRecommendationReasonParts(activity, profile, fit, {
+    decision,
     breakdown,
     constraints,
-  }).slice(0, 3);
+  });
+  const reasons = [
+    reasonParts.constraintReason,
+    reasonParts.primaryReason,
+    ...reasonParts.supportingReasons,
+  ].filter((reason): reason is string => Boolean(reason)).slice(0, 3);
 
   return {
     ...activity,
     score: scoreResult.score,
     confidence: scoreResult.confidence,
-    rawTier,
-    finalTier,
+    rawTier: decision.rawTier,
+    finalTier: decision.finalTier,
+    decision,
     reasons,
     breakdown,
     constraints,
-    tier: finalTier,
+    tier: decision.finalTier,
     gradeFit: fit.gradeFit,
     levelFit: fit.levelFit,
   };

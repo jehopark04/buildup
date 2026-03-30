@@ -11,7 +11,9 @@ import {
   buildProfileFromSearchParams,
   buildProfileSearchParams,
   getActivityTypeLabel,
+  getRecommendationInputState,
   getProfileSummary,
+  hasRecommendationTrack,
   hasCompleteProfile,
 } from "@/lib/profile";
 import {
@@ -46,7 +48,14 @@ export default async function ActivityDetailPage({
   const backHref = (
     profileQuery ? `/recommendations?${profileQuery}` : "/recommendations"
   ) as Route;
-  const recommendation = hasCompleteProfile(profile)
+  const hasTrack = hasRecommendationTrack(profile);
+  const isPrecise = hasCompleteProfile(profile);
+  const inputState = getRecommendationInputState(profile);
+  const missingDetails = [
+    !profile.grade ? "학년" : null,
+    !profile.level ? "현재 수준" : null,
+  ].filter((item): item is string => Boolean(item));
+  const recommendation = hasTrack
     ? getRecommendationForActivity(profile, activity.id)
     : null;
   const tierLabel = recommendation
@@ -134,6 +143,17 @@ export default async function ActivityDetailPage({
               </div>
             ))}
           </div>
+          {!isPrecise && hasTrack ? (
+            <div className="mt-5 rounded-2xl border border-dashed border-line bg-white px-4 py-4 text-sm leading-6 text-muted">
+              <p className="font-medium text-foreground">
+                {inputState === "trackOnly" ? "기본 추천 상태" : "부분 입력 추천 상태"}
+              </p>
+              <p className="mt-2">
+                {missingDetails.join(", ")} 정보가 비어 있어 현재는 보수적으로 추천을 계산했습니다.
+                남은 정보를 채우면 추천 신뢰도가 더 올라갑니다.
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="card-shadow rounded-[32px] border border-line bg-surface p-6">
@@ -152,7 +172,7 @@ export default async function ActivityDetailPage({
               ))
             ) : (
               <p className="text-sm leading-6 text-muted">
-                아직 조건 입력이 없거나, 현재 선택한 직무 기준 후보가 아니어서 추천 이유를 계산하지 않았습니다.
+                희망 직무가 없거나, 현재 선택한 직무 기준 후보가 아니어서 추천 이유를 계산하지 않았습니다.
               </p>
             )}
           </div>
