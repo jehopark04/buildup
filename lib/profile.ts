@@ -20,35 +20,26 @@ export const levelOptions = [
   { value: "ready", label: "실전 지원 직전" },
 ] as const;
 
-export const availabilityOptions = [
-  { value: "light", label: "주 2~4시간" },
-  { value: "steady", label: "주 5~8시간" },
-  { value: "focused", label: "주 9~12시간" },
-  { value: "immersive", label: "주 12시간 이상" },
-] as const;
-
 export const activityTypeOptions = [
-  { value: "hackathon", label: "해커톤" },
-  { value: "club", label: "학회 / 스터디" },
-  { value: "project", label: "산학 / 캡스톤" },
+  { value: "all", label: "전체" },
+  { value: "project", label: "교내 프로젝트" },
+  { value: "government", label: "정부지원 프로그램" },
+  { value: "bootcamp", label: "부트캠프" },
+  { value: "club", label: "동아리 / 커뮤니티" },
+  { value: "course", label: "강의 / 학습" },
   { value: "contest", label: "공모전" },
-  { value: "supporters", label: "서포터즈" },
   { value: "opensource", label: "오픈소스" },
-  { value: "startup", label: "창업 프로그램" },
-  { value: "global", label: "글로벌 프로그램" },
 ] as const;
 
 export type Track = (typeof trackOptions)[number]["value"];
 export type Grade = (typeof gradeOptions)[number]["value"];
 export type Level = (typeof levelOptions)[number]["value"];
-export type Availability = (typeof availabilityOptions)[number]["value"];
 export type ActivityType = (typeof activityTypeOptions)[number]["value"];
 
 export type UserProfile = {
   track: Track | null;
   grade: Grade | null;
   level: Level | null;
-  availability: Availability | null;
   activityTypes: ActivityType[];
 };
 
@@ -58,14 +49,12 @@ export const emptyProfile: UserProfile = {
   track: null,
   grade: null,
   level: null,
-  availability: null,
-  activityTypes: [],
+  activityTypes: ["all"],
 };
 
 const trackValues = new Set(trackOptions.map((option) => option.value));
 const gradeValues = new Set(gradeOptions.map((option) => option.value));
 const levelValues = new Set(levelOptions.map((option) => option.value));
-const availabilityValues = new Set(availabilityOptions.map((option) => option.value));
 const activityTypeValues = new Set(activityTypeOptions.map((option) => option.value));
 
 function normalizeArray(value: string | string[] | undefined) {
@@ -88,12 +77,16 @@ export function isLevel(value: string): value is Level {
   return levelValues.has(value as Level);
 }
 
-export function isAvailability(value: string): value is Availability {
-  return availabilityValues.has(value as Availability);
-}
-
 export function isActivityType(value: string): value is ActivityType {
   return activityTypeValues.has(value as ActivityType);
+}
+
+export function normalizeActivityTypes(activityTypes: ActivityType[]) {
+  if (activityTypes.length === 0 || activityTypes.includes("all")) {
+    return ["all"] as ActivityType[];
+  }
+
+  return Array.from(new Set(activityTypes));
 }
 
 export function buildProfileFromSearchParams(
@@ -105,17 +98,14 @@ export function buildProfileFromSearchParams(
     typeof params.grade === "string" && isGrade(params.grade) ? params.grade : null;
   const level =
     typeof params.level === "string" && isLevel(params.level) ? params.level : null;
-  const availability =
-    typeof params.availability === "string" && isAvailability(params.availability)
-      ? params.availability
-      : null;
-  const activityTypes = normalizeArray(params.activityTypes).filter(isActivityType);
+  const activityTypes = normalizeActivityTypes(
+    normalizeArray(params.activityTypes).filter(isActivityType),
+  );
 
   return {
     track,
     grade,
     level,
-    availability,
     activityTypes,
   };
 }
@@ -135,11 +125,7 @@ export function buildProfileSearchParams(profile: UserProfile) {
     params.set("level", profile.level);
   }
 
-  if (profile.availability) {
-    params.set("availability", profile.availability);
-  }
-
-  for (const activityType of profile.activityTypes) {
+  for (const activityType of normalizeActivityTypes(profile.activityTypes)) {
     params.append("activityTypes", activityType);
   }
 
@@ -152,11 +138,8 @@ export function hasCompleteProfile(
   track: Track;
   grade: Grade;
   level: Level;
-  availability: Availability;
 } {
-  return Boolean(
-    profile.track && profile.grade && profile.level && profile.availability,
-  );
+  return Boolean(profile.track && profile.grade && profile.level);
 }
 
 export function getTrackLabel(value: Track | null) {
@@ -171,12 +154,6 @@ export function getLevelLabel(value: Level | null) {
   return levelOptions.find((option) => option.value === value)?.label ?? "미선택";
 }
 
-export function getAvailabilityLabel(value: Availability | null) {
-  return (
-    availabilityOptions.find((option) => option.value === value)?.label ?? "미선택"
-  );
-}
-
 export function getActivityTypeLabel(value: ActivityType) {
   return activityTypeOptions.find((option) => option.value === value)?.label ?? value;
 }
@@ -186,11 +163,12 @@ export function getProfileSummary(profile: UserProfile) {
     `희망 직무: ${getTrackLabel(profile.track)}`,
     `현재 학년: ${getGradeLabel(profile.grade)}`,
     `현재 수준: ${getLevelLabel(profile.level)}`,
-    `시간 여유: ${getAvailabilityLabel(profile.availability)}`,
     `관심 활동 유형: ${
-      profile.activityTypes.length > 0
-        ? profile.activityTypes.map(getActivityTypeLabel).join(", ")
-        : "미선택"
+      normalizeActivityTypes(profile.activityTypes).includes("all")
+        ? "전체"
+        : normalizeActivityTypes(profile.activityTypes)
+            .map(getActivityTypeLabel)
+            .join(", ")
     }`,
   ];
 }

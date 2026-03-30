@@ -34,9 +34,9 @@ export default async function OnboardingPage({
           </p>
           <ul className="space-y-2 text-sm leading-6 text-muted">
             <li>희망 직무: 어떤 방향으로 경험을 쌓을지</li>
-            <li>학년 / 현재 수준: 지금 도전 가능한 난이도 판단</li>
-            <li>시간 여유: 지속 가능한 활동 강도 판단</li>
-            <li>관심 활동 유형: 해커톤, 공모전, 스터디 같은 선호 형식</li>
+            <li>학년 / 현재 수준: 지금 붙이면 효율적인 활동인지 판단</li>
+            <li>관심 활동 유형: 전체로 두거나, 선호 형식만 약하게 반영</li>
+            <li>추천 기준: 직무 필터 후 학년 / 수준 중심으로 나눔</li>
           </ul>
         </div>
       </section>

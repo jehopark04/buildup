@@ -1,7 +1,12 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { activityCatalog, getActivityById } from "@/lib/activities";
+import {
+  activityCatalog,
+  formatVerifiedDate,
+  getActivityById,
+  getRecruitmentStatusLabel,
+} from "@/lib/activities";
 import {
   buildProfileFromSearchParams,
   buildProfileSearchParams,
@@ -10,7 +15,7 @@ import {
   hasCompleteProfile,
 } from "@/lib/profile";
 import {
-  getRecommendationTierForActivity,
+  getRecommendationForActivity,
   getRecommendationTierLabel,
 } from "@/lib/recommendations";
 
@@ -41,8 +46,11 @@ export default async function ActivityDetailPage({
   const backHref = (
     profileQuery ? `/recommendations?${profileQuery}` : "/recommendations"
   ) as Route;
-  const tier = hasCompleteProfile(profile)
-    ? getRecommendationTierForActivity(profile, activity.id)
+  const recommendation = hasCompleteProfile(profile)
+    ? getRecommendationForActivity(profile, activity.id)
+    : null;
+  const tierLabel = recommendation
+    ? getRecommendationTierLabel(recommendation.tier)
     : null;
 
   return (
@@ -52,9 +60,17 @@ export default async function ActivityDetailPage({
           <span className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-muted">
             {activity.category}
           </span>
-          {tier ? (
+          <span className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-muted">
+            {getRecruitmentStatusLabel(activity.recruitmentStatus)}
+          </span>
+          {activity.isKauInternal ? (
+            <span className="rounded-full border border-line px-3 py-1 text-xs font-semibold text-muted">
+              항공대 내부
+            </span>
+          ) : null}
+          {tierLabel ? (
             <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-white">
-              {getRecommendationTierLabel(tier)}
+              {tierLabel}
             </span>
           ) : null}
         </div>
@@ -73,13 +89,33 @@ export default async function ActivityDetailPage({
           </div>
         </div>
 
-        <div className="mt-4 rounded-3xl bg-brand p-5 text-sm leading-6 text-white/85">
-          <p>
-            <span className="font-semibold text-white">추천 주기</span> {activity.cadence}
-          </p>
-          <p className="mt-2">
-            <span className="font-semibold text-white">다음 액션</span> {activity.nextStep}
-          </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-3xl bg-brand p-5 text-sm leading-6 text-white/85">
+            <p>
+              <span className="font-semibold text-white">예상 소요시간</span>{" "}
+              {activity.estimatedTime}
+            </p>
+            <p className="mt-2 text-white/75">{activity.timeBasis}</p>
+          </div>
+          <div className="rounded-3xl border border-line bg-white p-5 text-sm leading-6 text-muted">
+            <p className="font-semibold text-foreground">일정과 확인 포인트</p>
+            <p className="mt-3">
+              <span className="font-medium text-foreground">일정</span> {activity.scheduleText}
+            </p>
+            {activity.deadlineText ? (
+              <p className="mt-2">
+                <span className="font-medium text-foreground">마감</span>{" "}
+                {activity.deadlineText}
+              </p>
+            ) : null}
+            <p className="mt-2">
+              <span className="font-medium text-foreground">최종 확인</span>{" "}
+              {formatVerifiedDate(activity.lastVerifiedAt)}
+            </p>
+            <p className="mt-2">
+              <span className="font-medium text-foreground">다음 액션</span> {activity.nextStep}
+            </p>
+          </div>
         </div>
       </section>
 
@@ -102,9 +138,25 @@ export default async function ActivityDetailPage({
 
         <div className="card-shadow rounded-[32px] border border-line bg-surface p-6">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
-            활동 유형
+            추천 이유
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 space-y-3">
+            {recommendation ? (
+              recommendation.reasons.map((reason) => (
+                <div
+                  key={reason}
+                  className="rounded-2xl border border-line bg-white px-4 py-3 text-sm leading-6"
+                >
+                  {reason}
+                </div>
+              ))
+            ) : (
+              <p className="text-sm leading-6 text-muted">
+                아직 조건 입력이 없거나, 현재 선택한 직무 기준 후보가 아니어서 추천 이유를 계산하지 않았습니다.
+              </p>
+            )}
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
             {activity.activityTypes.map((activityType) => (
               <span
                 key={activityType}
@@ -114,14 +166,20 @@ export default async function ActivityDetailPage({
               </span>
             ))}
           </div>
-          <p className="mt-5 text-sm leading-6 text-muted">
-            {tier
-              ? `현재 조건 기준 이 활동은 "${getRecommendationTierLabel(tier)}" 구간에 들어갑니다.`
-              : "아직 조건 입력이 없어 추천 구간은 계산하지 않았습니다."}
+          <a
+            href={activity.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-6 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold hover:border-foreground/15 hover:bg-white"
+          >
+            공식 공고 / 안내 보기
+          </a>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            출처: {activity.sourceName}
           </p>
           <Link
             href={backHref}
-            className="mt-6 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold hover:border-foreground/15 hover:bg-white"
+            className="mt-3 inline-flex rounded-full border border-line px-5 py-3 text-sm font-semibold hover:border-foreground/15 hover:bg-white"
           >
             추천 결과로 돌아가기
           </Link>

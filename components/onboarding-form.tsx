@@ -1,9 +1,13 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import {
   activityTypeOptions,
-  availabilityOptions,
   gradeOptions,
   levelOptions,
+  normalizeActivityTypes,
   trackOptions,
+  type ActivityType,
   type UserProfile,
 } from "@/lib/profile";
 
@@ -11,7 +15,39 @@ type OnboardingFormProps = {
   defaults: UserProfile;
 };
 
+function getInitialActivityTypes(defaults: UserProfile) {
+  return normalizeActivityTypes(defaults.activityTypes);
+}
+
 export function OnboardingForm({ defaults }: OnboardingFormProps) {
+  const [track, setTrack] = useState(defaults.track ?? "");
+  const [grade, setGrade] = useState(defaults.grade ?? "");
+  const [level, setLevel] = useState(defaults.level ?? "");
+  const [activityTypes, setActivityTypes] = useState<ActivityType[]>(
+    getInitialActivityTypes(defaults),
+  );
+
+  const activityTypeSet = useMemo(() => new Set(activityTypes), [activityTypes]);
+
+  function handleActivityTypeChange(value: ActivityType) {
+    if (value === "all") {
+      setActivityTypes(["all"]);
+      return;
+    }
+
+    setActivityTypes((current) => {
+      const next = current.filter((activityType) => activityType !== "all");
+      const exists = next.includes(value);
+
+      if (exists) {
+        const filtered = next.filter((activityType) => activityType !== value);
+        return filtered.length > 0 ? filtered : ["all"];
+      }
+
+      return [...next, value];
+    });
+  }
+
   return (
     <form
       action="/recommendations"
@@ -22,7 +58,7 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
           <p className="text-sm font-semibold text-accent">01</p>
           <h2 className="text-2xl font-semibold tracking-tight">희망 직무</h2>
           <p className="text-sm leading-6 text-muted">
-            어떤 역할로 경험을 쌓고 싶은지 먼저 정합니다.
+            추천 화면에는 이 직무와 관련된 활동만 먼저 보여줍니다.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -36,7 +72,8 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
                 name="track"
                 value={option.value}
                 required
-                defaultChecked={defaults.track === option.value}
+                checked={track === option.value}
+                onChange={() => setTrack(option.value)}
                 className="h-4 w-4 accent-accent"
               />
               <span className="text-sm font-medium">{option.label}</span>
@@ -54,7 +91,8 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
           <select
             name="grade"
             required
-            defaultValue={defaults.grade ?? ""}
+            value={grade}
+            onChange={(event) => setGrade(event.target.value)}
             className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-accent"
           >
             <option value="" disabled>
@@ -76,7 +114,8 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
           <select
             name="level"
             required
-            defaultValue={defaults.level ?? ""}
+            value={level}
+            onChange={(event) => setLevel(event.target.value)}
             className="w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm outline-none focus:border-accent"
           >
             <option value="" disabled>
@@ -94,37 +133,9 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
       <section className="space-y-4">
         <div className="space-y-1">
           <p className="text-sm font-semibold text-accent">04</p>
-          <h2 className="text-xl font-semibold tracking-tight">시간 여유</h2>
-          <p className="text-sm leading-6 text-muted">
-            무리 없이 지속할 수 있는 주간 기준으로 선택하세요.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {availabilityOptions.map((option) => (
-            <label
-              key={option.value}
-              className="flex cursor-pointer items-center gap-3 rounded-3xl border border-line bg-surface-strong px-4 py-4 hover:border-foreground/15 hover:bg-white"
-            >
-              <input
-                type="radio"
-                name="availability"
-                value={option.value}
-                required
-                defaultChecked={defaults.availability === option.value}
-                className="h-4 w-4 accent-accent"
-              />
-              <span className="text-sm font-medium">{option.label}</span>
-            </label>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-accent">05</p>
           <h2 className="text-xl font-semibold tracking-tight">관심 활동 유형</h2>
           <p className="text-sm leading-6 text-muted">
-            지금 끌리는 형식이 있다면 여러 개 선택해도 됩니다.
+            전체를 두면 직무 기준으로만 보고, 특정 유형을 고르면 같은 tier 안에서만 살짝 위로 올립니다.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -137,7 +148,8 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
                 type="checkbox"
                 name="activityTypes"
                 value={option.value}
-                defaultChecked={defaults.activityTypes.includes(option.value)}
+                checked={activityTypeSet.has(option.value)}
+                onChange={() => handleActivityTypeChange(option.value)}
                 className="h-4 w-4 rounded accent-accent"
               />
               <span className="text-sm font-medium">{option.label}</span>
@@ -148,7 +160,7 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
 
       <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-muted">
-          빌드업은 이 다섯 가지 정보만으로 우선순위 높은 활동부터 먼저 정리합니다.
+          빌드업은 직무를 먼저 좁히고, 학년과 현재 수준으로 추천 / 조건부 추천 / 비추천을 나눕니다.
         </p>
         <button
           type="submit"

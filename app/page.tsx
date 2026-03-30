@@ -9,8 +9,7 @@ const sampleProfile: UserProfile = {
   track: "frontend",
   grade: "junior",
   level: "project",
-  availability: "steady",
-  activityTypes: ["hackathon", "club"],
+  activityTypes: ["all"],
 };
 
 const sampleRecommendationsHref = `/recommendations?${buildProfileSearchParams(sampleProfile)}` as Route;
@@ -29,8 +28,8 @@ export default function HomePage() {
             빌드업이 먼저 좁혀줄게.
           </h1>
           <p className="mx-auto max-w-2xl text-base leading-7 text-muted sm:text-lg">
-            희망 직무, 학년, 현재 수준, 시간 여유, 관심 활동 유형만 알려주면
-            지금 검토할 활동부터 낮은 우선순위까지 한 번에 정리해 줍니다.
+            희망 직무, 학년, 현재 수준, 관심 활동 유형만 알려주면
+            지금 바로 볼 카드와 아직은 미뤄도 되는 카드를 한 번에 정리해 줍니다.
           </p>
         </div>
 
@@ -39,16 +38,10 @@ export default function HomePage() {
           className="card-shadow mx-auto block max-w-3xl rounded-[34px] border border-line bg-white px-6 py-6 text-left hover:border-foreground/12"
         >
           <div className="text-lg font-medium text-muted">
-            예: 프론트엔드 3학년이고, 주 6시간 정도 투자 가능해요.
+            예: 백엔드 3학년이고 프로젝트 경험이 있어요.
           </div>
           <div className="mt-5 flex flex-wrap gap-2">
-            {[
-              "희망 직무",
-              "학년",
-              "현재 수준",
-              "시간 여유",
-              "관심 활동 유형",
-            ].map((item) => (
+            {["희망 직무", "학년", "현재 수준", "관심 활동 유형"].map((item) => (
               <span
                 key={item}
                 className="rounded-full border border-line bg-surface-strong px-3 py-1.5 text-xs font-medium text-muted"
@@ -59,7 +52,7 @@ export default function HomePage() {
           </div>
           <div className="mt-6 flex items-center justify-between gap-4">
             <p className="text-sm leading-6 text-muted">
-              입력은 1분 내로 끝납니다. 로그인 없이 먼저 흐름만 확인할 수 있습니다.
+              입력은 1분 내로 끝납니다. 한국항공대 학생 기준으로 공식 활동 채널과 함께 보여줍니다.
             </p>
             <span className="rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white">
               시작하기
@@ -71,7 +64,7 @@ export default function HomePage() {
           <span>빌드업이 물어보는 것</span>
           <span className="rounded-full border border-line px-3 py-1.5">희망 직무</span>
           <span className="rounded-full border border-line px-3 py-1.5">학년</span>
-          <span className="rounded-full border border-line px-3 py-1.5">시간 여유</span>
+          <span className="rounded-full border border-line px-3 py-1.5">현재 수준</span>
         </div>
 
         <div className="pt-2">
