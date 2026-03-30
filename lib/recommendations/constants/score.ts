@@ -19,6 +19,10 @@ export const fitScoreMap: Record<
     grade: -5,
     level: -6,
   },
+  unknown: {
+    grade: 0.5,
+    level: 1,
+  },
 };
 
 export const statusWeight = 0.5;

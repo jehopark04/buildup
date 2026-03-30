@@ -6,6 +6,7 @@ import {
 } from "@/lib/profile";
 import type {
   FitState,
+  RecommendationConfidence,
   RecommendationFit,
   RecommendationResult,
 } from "./types";
@@ -15,8 +16,8 @@ function getGradeReason(
   profile: UserProfile,
   gradeFit: FitState,
 ) {
-  if (!profile.grade) {
-    return null;
+  if (gradeFit === "unknown" || !profile.grade) {
+    return "학년 정보가 없어 학년 적합도는 보수적으로만 판단했습니다.";
   }
 
   if (gradeFit === "fit") {
@@ -37,8 +38,8 @@ function getLevelReason(
   profile: UserProfile,
   levelFit: FitState,
 ) {
-  if (!profile.level) {
-    return null;
+  if (levelFit === "unknown" || !profile.level) {
+    return "현재 수준 정보가 없어 요구 수준 적합도는 보수적으로만 판단했습니다.";
   }
 
   if (levelFit === "fit") {
@@ -72,6 +73,18 @@ function getPrimaryReason(
   fit: RecommendationFit,
   result: Pick<RecommendationResult, "breakdown">,
 ) {
+  if (fit.gradeFit === "unknown" && fit.levelFit === "unknown") {
+    return "학년과 현재 수준 정보가 모두 없어 추천 신뢰도가 낮습니다.";
+  }
+
+  if (fit.gradeFit === "unknown" && fit.levelFit !== "unknown") {
+    return `현재 수준은 반영했지만 학년 정보가 없어 ${result.breakdown.confidence === "medium" ? "보수적으로" : ""} 추천했습니다.`;
+  }
+
+  if (fit.levelFit === "unknown" && fit.gradeFit !== "unknown") {
+    return `학년은 반영했지만 현재 수준 정보가 없어 ${result.breakdown.confidence === "medium" ? "보수적으로" : ""} 추천했습니다.`;
+  }
+
   if (fit.gradeFit === "fit" && fit.levelFit === "fit") {
     return "학년과 현재 수준이 모두 맞아 가장 추천입니다.";
   }
@@ -103,6 +116,18 @@ function getPrimaryReason(
   return getGradeReason(activity, profile, fit.gradeFit);
 }
 
+function getConfidenceReason(confidence: RecommendationConfidence) {
+  if (confidence === "high") {
+    return null;
+  }
+
+  if (confidence === "medium") {
+    return "입력 정보가 일부 비어 있어 추천 신뢰도는 중간 수준입니다.";
+  }
+
+  return "입력 정보가 부족해 추천 신뢰도는 낮은 편입니다.";
+}
+
 export function getRecommendationReasons(
   activity: Activity,
   profile: UserProfile,
@@ -113,6 +138,7 @@ export function getRecommendationReasons(
     getPrimaryReason(activity, profile, fit, {
       breakdown: result.breakdown,
     }),
+    getConfidenceReason(result.breakdown.confidence),
     fit.typeMatched
       ? "관심 활동 유형과도 맞아 같은 tier 안에서는 우선순위를 높였습니다."
       : getStatusReason(activity),

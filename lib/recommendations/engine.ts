@@ -5,6 +5,7 @@ import { getRecommendationFit } from "./fit";
 import { getRecommendationReasons } from "./reasons";
 import { getRecommendationScoreResult, sortRecommendationMatches } from "./score";
 import {
+  applyConfidenceCap,
   applyTierConstraints,
   getRawTierFromScore,
 } from "./tier";
@@ -17,8 +18,9 @@ function buildRecommendationMatch(
   const fit = getRecommendationFit(profile, activity);
   const scoreResult = getRecommendationScoreResult(activity, fit);
   const rawTier = getRawTierFromScore(scoreResult.score);
+  const confidenceTier = applyConfidenceCap(rawTier, scoreResult.confidence);
   const constraints = getRecommendationEligibility(profile, activity);
-  const finalTier = applyTierConstraints(rawTier, constraints);
+  const finalTier = applyTierConstraints(confidenceTier, constraints);
   const breakdown = {
     ...scoreResult.breakdown,
     rawTier,
@@ -34,6 +36,7 @@ function buildRecommendationMatch(
   return {
     ...activity,
     score: scoreResult.score,
+    confidence: scoreResult.confidence,
     rawTier,
     finalTier,
     reasons,

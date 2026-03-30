@@ -1,4 +1,7 @@
-import type { RecommendationTier } from "../types";
+import type {
+  RecommendationConfidence,
+  RecommendationTier,
+} from "../types";
 
 export const tierLabelMap: Record<RecommendationTier, string> = {
   best: "가장 추천",
@@ -27,4 +30,10 @@ export const tierPriorityMap: Record<RecommendationTier, number> = {
   best: 2,
   conditional: 1,
   notNow: 0,
+};
+
+export const confidenceTierCapMap: Partial<
+  Record<RecommendationConfidence, RecommendationTier>
+> = {
+  low: "conditional",
 };

@@ -1,6 +1,7 @@
 export type {
   FitState,
   RecommendationBreakdown,
+  RecommendationConfidence,
   RecommendationConstraints,
   RecommendationFit,
   RecommendationMatch,

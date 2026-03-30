@@ -6,12 +6,20 @@ import {
   statusWeight,
 } from "./constants/score";
 import { tierPriorityMap } from "./constants/tier";
-import type { RecommendationBreakdown, RecommendationFit, RecommendationMatch } from "./types";
+import {
+  getRecommendationConfidence,
+} from "./fit";
+import type {
+  RecommendationBreakdown,
+  RecommendationFit,
+  RecommendationMatch,
+} from "./types";
 
 export function getRecommendationScoreResult(
   activity: Activity,
   fit: RecommendationFit,
 ) {
+  const confidence = getRecommendationConfidence(fit);
   const gradeScore = fitScoreMap[fit.gradeFit].grade;
   const levelScore = fitScoreMap[fit.levelFit].level;
   const recruitmentStatusScore =
@@ -26,12 +34,16 @@ export function getRecommendationScoreResult(
 
   return {
     score: rawScore,
+    confidence,
     breakdown: {
+      gradeFit: fit.gradeFit,
+      levelFit: fit.levelFit,
       gradeScore,
       levelScore,
       recruitmentStatusScore,
       activityTypeScore,
       rawScore,
+      confidence,
       rawTier: "notNow",
       finalTier: "notNow",
     } satisfies RecommendationBreakdown,
