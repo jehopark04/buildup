@@ -5,7 +5,12 @@ import {
   getLevelLabel,
   type UserProfile,
 } from "@/lib/profile";
-import type { FitState, RecommendationFit } from "./types";
+import type {
+  FitState,
+  RecommendationBreakdown,
+  RecommendationFit,
+  RecommendationResult,
+} from "./types";
 
 function getGradeReason(
   activity: Activity,
@@ -63,16 +68,55 @@ function getStatusReason(activity: Activity) {
   return `상시 확인형 채널이라 ${formatVerifiedDate(activity.lastVerifiedAt)} 기준 링크를 저장해 두는 편이 좋습니다.`;
 }
 
+function getBreakdownReason(
+  activity: Activity,
+  profile: UserProfile,
+  fit: RecommendationFit,
+  breakdown: RecommendationBreakdown,
+) {
+  if (breakdown.key === "gradeFit") {
+    return getGradeReason(activity, profile, fit.gradeFit);
+  }
+
+  if (breakdown.key === "levelFit") {
+    return getLevelReason(activity, profile, fit.levelFit);
+  }
+
+  if (breakdown.key === "activityType" && fit.typeMatched) {
+    return `관심 활동 유형인 ${fit.normalizedTypes.map(getActivityTypeLabel).join(", ")}와도 맞습니다.`;
+  }
+
+  if (breakdown.key === "recruitmentStatus") {
+    return getStatusReason(activity);
+  }
+
+  return null;
+}
+
 export function getRecommendationReasons(
   activity: Activity,
   profile: UserProfile,
   fit: RecommendationFit,
+  result: Pick<RecommendationResult, "breakdown" | "constraints">,
 ) {
-  return [
-    getGradeReason(activity, profile, fit.gradeFit),
-    getLevelReason(activity, profile, fit.levelFit),
-    fit.typeMatched
-      ? `관심 활동 유형인 ${fit.normalizedTypes.map(getActivityTypeLabel).join(", ")}와도 맞습니다.`
-      : getStatusReason(activity),
-  ].filter((reason): reason is string => Boolean(reason));
+  const sortedBreakdown = [...result.breakdown].sort((left, right) => {
+    const valueDiff = Math.abs(right.value) - Math.abs(left.value);
+
+    if (valueDiff !== 0) {
+      return valueDiff;
+    }
+
+    return 0;
+  });
+
+  const reasons = sortedBreakdown
+    .map((breakdown) => getBreakdownReason(activity, profile, fit, breakdown))
+    .filter((reason): reason is string => Boolean(reason));
+
+  const constraintNotes =
+    result.constraints?.blocked
+      ? (result.constraints.notes ?? []).filter((note) => !reasons.includes(note))
+      : [];
+
+  return [...reasons, ...constraintNotes];
 }

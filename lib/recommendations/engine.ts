@@ -2,8 +2,12 @@ import { activityCatalog } from "@/lib/activities";
 import type { UserProfile } from "@/lib/profile";
 import { getRecommendationFit } from "./fit";
 import { getRecommendationReasons } from "./reasons";
-import { getRecommendationScore, sortRecommendationMatches } from "./score";
-import { getTier } from "./tier";
+import { getRecommendationScoreResult, sortRecommendationMatches } from "./score";
+import {
+  applyTierConstraints,
+  getRawTierFromScore,
+  getRecommendationConstraints,
+} from "./tier";
 import type { RecommendationMatch } from "./types";
 
 function buildRecommendationMatch(
@@ -11,12 +15,25 @@ function buildRecommendationMatch(
   activity: (typeof activityCatalog)[number],
 ): RecommendationMatch {
   const fit = getRecommendationFit(profile, activity);
+  const scoreResult = getRecommendationScoreResult(activity, fit);
+  const rawTier = getRawTierFromScore(scoreResult.score);
+  const constraints = getRecommendationConstraints(fit);
+  const finalTier = applyTierConstraints(rawTier, constraints);
+
+  const reasons = getRecommendationReasons(activity, profile, fit, {
+    breakdown: scoreResult.breakdown,
+    constraints,
+  }).slice(0, 3);
 
   return {
     ...activity,
-    score: getRecommendationScore(activity, fit),
-    reasons: getRecommendationReasons(activity, profile, fit).slice(0, 3),
-    tier: getTier(fit.gradeFit, fit.levelFit),
+    score: scoreResult.score,
+    rawTier,
+    finalTier,
+    reasons,
+    breakdown: scoreResult.breakdown,
+    constraints,
+    tier: finalTier,
     gradeFit: fit.gradeFit,
     levelFit: fit.levelFit,
   };

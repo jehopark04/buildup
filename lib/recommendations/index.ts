@@ -1,7 +1,11 @@
 export type {
+  BreakdownDirection,
   FitState,
+  RecommendationBreakdown,
+  RecommendationConstraints,
   RecommendationFit,
   RecommendationMatch,
+  RecommendationResult,
   RecommendationSection,
   RecommendationTier,
 } from "./types";

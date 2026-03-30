@@ -32,7 +32,7 @@ export function getRecommendationSections(
       tier,
       title: sectionTitleMap[tier],
       description: getSectionDescription(tier, trackLabel),
-      items: ranked.filter((activity) => activity.tier === tier),
+      items: ranked.filter((activity) => activity.finalTier === tier),
     }))
     .filter((section) => section.items.length > 0);
 }

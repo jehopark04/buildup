@@ -17,3 +17,14 @@ export const tierOrder: RecommendationTier[] = [
   "conditional",
   "notNow",
 ];
+
+export const rawTierThresholds = {
+  best: 10,
+  conditional: 5,
+};
+
+export const tierPriorityMap: Record<RecommendationTier, number> = {
+  best: 2,
+  conditional: 1,
+  notNow: 0,
+};
