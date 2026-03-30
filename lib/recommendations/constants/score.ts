@@ -8,16 +8,16 @@ export const fitScoreMap: Record<
   }
 > = {
   fit: {
-    grade: 6,
+    grade: 4,
     level: 5,
   },
   near: {
-    grade: 2,
-    level: 1,
+    grade: 1,
+    level: 2,
   },
   far: {
-    grade: -6,
-    level: -5,
+    grade: -5,
+    level: -6,
   },
 };
 

@@ -11,6 +11,16 @@ export type ActivityCategory =
 
 export type RecruitmentStatus = "open" | "upcoming" | "rolling";
 
+export type ActivityEligibility = {
+  minGrade?: Grade;
+  maxGrade?: Grade;
+  minLevel?: Level;
+  maxLevel?: Level;
+  maxAllowedTier?: "best" | "conditional" | "notNow";
+  blocked?: boolean;
+  notes?: string[];
+};
+
 export type Activity = {
   id: string;
   title: string;
@@ -29,6 +39,7 @@ export type Activity = {
   deadlineText?: string;
   lastVerifiedAt: string;
   isKauInternal: boolean;
+  eligibility?: ActivityEligibility;
   tracks: Track[];
   grades: Grade[];
   levels: Level[];

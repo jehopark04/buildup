@@ -1,12 +1,12 @@
 import { activityCatalog } from "@/lib/activities";
 import type { UserProfile } from "@/lib/profile";
+import { getRecommendationEligibility } from "./eligibility";
 import { getRecommendationFit } from "./fit";
 import { getRecommendationReasons } from "./reasons";
 import { getRecommendationScoreResult, sortRecommendationMatches } from "./score";
 import {
   applyTierConstraints,
   getRawTierFromScore,
-  getRecommendationConstraints,
 } from "./tier";
 import type { RecommendationMatch } from "./types";
 
@@ -17,11 +17,17 @@ function buildRecommendationMatch(
   const fit = getRecommendationFit(profile, activity);
   const scoreResult = getRecommendationScoreResult(activity, fit);
   const rawTier = getRawTierFromScore(scoreResult.score);
-  const constraints = getRecommendationConstraints(fit);
+  const constraints = getRecommendationEligibility(profile, activity);
   const finalTier = applyTierConstraints(rawTier, constraints);
+  const breakdown = {
+    ...scoreResult.breakdown,
+    rawTier,
+    finalTier,
+    constraints,
+  };
 
   const reasons = getRecommendationReasons(activity, profile, fit, {
-    breakdown: scoreResult.breakdown,
+    breakdown,
     constraints,
   }).slice(0, 3);
 
@@ -31,7 +37,7 @@ function buildRecommendationMatch(
     rawTier,
     finalTier,
     reasons,
-    breakdown: scoreResult.breakdown,
+    breakdown,
     constraints,
     tier: finalTier,
     gradeFit: fit.gradeFit,

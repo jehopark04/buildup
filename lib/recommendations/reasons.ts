@@ -1,13 +1,11 @@
 import { formatVerifiedDate, type Activity } from "@/lib/activities";
 import {
-  getActivityTypeLabel,
   getGradeLabel,
   getLevelLabel,
   type UserProfile,
 } from "@/lib/profile";
 import type {
   FitState,
-  RecommendationBreakdown,
   RecommendationFit,
   RecommendationResult,
 } from "./types";
@@ -68,29 +66,41 @@ function getStatusReason(activity: Activity) {
   return `상시 확인형 채널이라 ${formatVerifiedDate(activity.lastVerifiedAt)} 기준 링크를 저장해 두는 편이 좋습니다.`;
 }
 
-function getBreakdownReason(
+function getPrimaryReason(
   activity: Activity,
   profile: UserProfile,
   fit: RecommendationFit,
-  breakdown: RecommendationBreakdown,
+  result: Pick<RecommendationResult, "breakdown">,
 ) {
-  if (breakdown.key === "gradeFit") {
-    return getGradeReason(activity, profile, fit.gradeFit);
+  if (fit.gradeFit === "fit" && fit.levelFit === "fit") {
+    return "학년과 현재 수준이 모두 맞아 가장 추천입니다.";
   }
 
-  if (breakdown.key === "levelFit") {
+  if (fit.gradeFit === "near" && fit.levelFit === "near") {
+    return "학년과 현재 수준이 모두 한 단계 차이라 준비하면 도전 가능한 조건부 추천입니다.";
+  }
+
+  if (fit.gradeFit === "fit" && fit.levelFit === "near") {
+    return `학년은 맞지만 ${getLevelReason(activity, profile, fit.levelFit)?.replaceAll(".", "")} 조건부 추천입니다.`;
+  }
+
+  if (fit.gradeFit === "near" && fit.levelFit === "fit") {
+    return `현재 수준은 맞지만 ${getGradeReason(activity, profile, fit.gradeFit)?.replaceAll(".", "")} 조건부 추천입니다.`;
+  }
+
+  if (fit.levelFit === "far") {
+    return `${getLevelReason(activity, profile, fit.levelFit)} 지금은 비추천입니다.`;
+  }
+
+  if (fit.gradeFit === "far") {
+    return `${getGradeReason(activity, profile, fit.gradeFit)} 지금은 비추천입니다.`;
+  }
+
+  if (result.breakdown.levelScore >= result.breakdown.gradeScore) {
     return getLevelReason(activity, profile, fit.levelFit);
   }
 
-  if (breakdown.key === "activityType" && fit.typeMatched) {
-    return `관심 활동 유형인 ${fit.normalizedTypes.map(getActivityTypeLabel).join(", ")}와도 맞습니다.`;
-  }
-
-  if (breakdown.key === "recruitmentStatus") {
-    return getStatusReason(activity);
-  }
-
-  return null;
+  return getGradeReason(activity, profile, fit.gradeFit);
 }
 
 export function getRecommendationReasons(
@@ -99,23 +109,19 @@ export function getRecommendationReasons(
   fit: RecommendationFit,
   result: Pick<RecommendationResult, "breakdown" | "constraints">,
 ) {
-  const sortedBreakdown = [...result.breakdown].sort((left, right) => {
-    const valueDiff = Math.abs(right.value) - Math.abs(left.value);
-
-    if (valueDiff !== 0) {
-      return valueDiff;
-    }
-
-    return 0;
-  });
-
-  const reasons = sortedBreakdown
-    .map((breakdown) => getBreakdownReason(activity, profile, fit, breakdown))
-    .filter((reason): reason is string => Boolean(reason));
+  const reasons = [
+    getPrimaryReason(activity, profile, fit, {
+      breakdown: result.breakdown,
+    }),
+    fit.typeMatched
+      ? "관심 활동 유형과도 맞아 같은 tier 안에서는 우선순위를 높였습니다."
+      : getStatusReason(activity),
+  ].filter((reason): reason is string => Boolean(reason));
 
   const constraintNotes =
-    result.constraints?.blocked
-      ? (result.constraints.notes ?? []).filter((note) => !reasons.includes(note))
+    result.constraints?.blocked ||
+    result.breakdown.rawTier !== result.breakdown.finalTier
+      ? result.constraints?.notes.filter((note) => !reasons.includes(note)) ?? []
       : [];
 
   return [...reasons, ...constraintNotes];

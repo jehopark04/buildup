@@ -19,8 +19,8 @@ export const tierOrder: RecommendationTier[] = [
 ];
 
 export const rawTierThresholds = {
-  best: 10,
-  conditional: 5,
+  best: 8.5,
+  conditional: 3,
 };
 
 export const tierPriorityMap: Record<RecommendationTier, number> = {

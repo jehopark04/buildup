@@ -3,7 +3,6 @@ import type { ActivityType } from "@/lib/profile";
 
 export type RecommendationTier = "best" | "conditional" | "notNow";
 export type FitState = "fit" | "near" | "far";
-export type BreakdownDirection = "positive" | "negative" | "neutral";
 
 export type RecommendationFit = {
   gradeFit: FitState;
@@ -13,20 +12,20 @@ export type RecommendationFit = {
 };
 
 export type RecommendationBreakdown = {
-  key:
-    | "gradeFit"
-    | "levelFit"
-    | "recruitmentStatus"
-    | "activityType";
-  label: string;
-  value: number;
-  direction: BreakdownDirection;
+  gradeScore: number;
+  levelScore: number;
+  recruitmentStatusScore: number;
+  activityTypeScore: number;
+  rawScore: number;
+  rawTier: RecommendationTier;
+  finalTier: RecommendationTier;
+  constraints?: RecommendationConstraints;
 };
 
 export type RecommendationConstraints = {
   maxAllowedTier?: RecommendationTier;
   blocked?: boolean;
-  notes?: string[];
+  notes: string[];
 };
 
 export type RecommendationResult = {
@@ -34,7 +33,7 @@ export type RecommendationResult = {
   rawTier: RecommendationTier;
   finalTier: RecommendationTier;
   reasons: string[];
-  breakdown: RecommendationBreakdown[];
+  breakdown: RecommendationBreakdown;
   constraints?: RecommendationConstraints;
 };
 

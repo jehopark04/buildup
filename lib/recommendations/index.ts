@@ -1,5 +1,4 @@
 export type {
-  BreakdownDirection,
   FitState,
   RecommendationBreakdown,
   RecommendationConstraints,
@@ -15,5 +14,6 @@ export {
   getRecommendedActivities,
 } from "./engine";
 
+export { getRecommendationEligibility } from "./eligibility";
 export { getRecommendationSections } from "./sections";
 export { getRecommendationTierLabel } from "./tier";
