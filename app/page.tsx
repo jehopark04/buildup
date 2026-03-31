@@ -1,80 +1,136 @@
-import type { Route } from "next";
 import Link from "next/link";
-import {
-  buildProfileSearchParams,
-  type UserProfile,
-} from "@/lib/profile";
 
-const sampleProfile: UserProfile = {
-  track: "frontend",
-  grade: "junior",
-  level: "project",
-  activityTypes: ["all"],
-};
+function SparkIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3.5 14.2 9l5.3 2.2-5.3 2.1L12 18.5l-2.2-5.2-5.3-2.1L9.8 9 12 3.5Z" />
+      <path d="M18.5 3.5v3" />
+      <path d="M20 5h-3" />
+      <path d="m5.5 16.5.8 2" />
+      <path d="m3.8 18.2 2-.8" />
+    </svg>
+  );
+}
 
-const sampleRecommendationsHref = `/recommendations?${buildProfileSearchParams(sampleProfile)}` as Route;
+function LaptopIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="5" width="16" height="11" rx="2" />
+      <path d="M2.5 18.5h19" />
+      <path d="M9.5 18.5h5" />
+    </svg>
+  );
+}
+
+function TrendIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-7 w-7"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m5 16 5-5 4 4 5-6" />
+      <path d="M14 9h5v5" />
+    </svg>
+  );
+}
+
+const featureCards = [
+  {
+    title: "맞춤 추천",
+    description: "당신의 기술 스택과 관심사를 분석하여 최적의 활동을 추천합니다.",
+    icon: SparkIcon,
+    iconClassName: "bg-[#dbe7ff] text-accent",
+  },
+  {
+    title: "다양한 활동",
+    description: "같은 목표를 가진 개발자들과 함께 성장하세요.",
+    icon: LaptopIcon,
+    iconClassName: "bg-[#e5e8ff] text-[#4c5cf0]",
+  },
+  {
+    title: "성장",
+    description: "스터디와 프로젝트 활동으로 당신을 성장시켜드립니다.",
+    icon: TrendIcon,
+    iconClassName: "bg-[#f1e4ff] text-[#8b42ff]",
+  },
+] as const;
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-[calc(100vh-132px)] flex-col items-center justify-center">
-      <section className="w-full max-w-4xl space-y-8 text-center">
-        <div className="space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
-            BuildUp
-          </p>
-          <h1 className="text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-            지금 너한테 맞는 활동,
-            <br />
-            빌드업이 먼저 좁혀줄게.
-          </h1>
-          <p className="mx-auto max-w-2xl text-base leading-7 text-muted sm:text-lg">
-            희망 직무만 알려줘도 기본 추천은 시작할 수 있고,
-            학년과 현재 수준까지 넣으면 더 정밀하게 우선순위를 나눠줍니다.
-          </p>
-        </div>
-
-        <Link
-          href="/onboarding"
-          className="card-shadow mx-auto block max-w-3xl rounded-[34px] border border-line bg-white px-6 py-6 text-left hover:border-foreground/12"
-        >
-          <div className="text-lg font-medium text-muted">
-            예: 백엔드를 희망하고, 가능하면 학년과 현재 수준도 같이 알려주세요.
-          </div>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {["희망 직무", "학년", "현재 수준", "관심 활동 유형"].map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-line bg-surface-strong px-3 py-1.5 text-xs font-medium text-muted"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-          <div className="mt-6 flex items-center justify-between gap-4">
-            <p className="text-sm leading-6 text-muted">
-              직무는 필수, 학년과 현재 수준은 선택입니다. 입력이 많을수록 추천 신뢰도가 올라갑니다.
-            </p>
-            <span className="rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white">
-              시작하기
+    <main className="relative flex min-h-[calc(100vh-132px)] flex-col justify-center bg-background py-4">
+      <section className="flex items-center justify-center">
+        <div className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2.5 rounded-full bg-[#dce8ff]/80 px-4 py-2.5 text-sm font-semibold text-accent shadow-[0_14px_30px_rgba(53,99,233,0.12)]">
+            <span className="scale-90">
+              <LaptopIcon />
             </span>
+            <span>개발자를 위한 활동 매칭</span>
           </div>
-        </Link>
+          <h1 className="mt-6 max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl">
+            당신에게 맞는 활동
+            <br />
+            한번에 찾아드릴게요
+          </h1>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-muted sm:text-lg sm:leading-8">
+            개발자를 위한 맞춤형 활동, 스펙업의 기회를 발견하세요.
+          </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-muted">
-          <span>빌드업이 물어보는 것</span>
-          <span className="rounded-full border border-line px-3 py-1.5">희망 직무 필수</span>
-          <span className="rounded-full border border-line px-3 py-1.5">학년 선택</span>
-          <span className="rounded-full border border-line px-3 py-1.5">현재 수준 선택</span>
-        </div>
-
-        <div className="pt-2">
           <Link
-            href={sampleRecommendationsHref}
-            className="text-sm font-semibold text-accent hover:text-accent/80"
+            href="/onboarding"
+            className="mt-8 inline-flex min-w-44 items-center justify-center rounded-[20px] bg-brand px-8 py-4 text-xl font-semibold text-white card-shadow hover:-translate-y-0.5 hover:bg-brand-deep"
           >
-            샘플 결과 먼저 보기
+            시작하기
           </Link>
         </div>
+      </section>
+
+      <section className="mx-auto mt-6 grid w-full max-w-4xl gap-3 lg:grid-cols-3">
+        {featureCards.map((card) => {
+          const Icon = card.icon;
+
+          return (
+            <article
+              key={card.title}
+              className="card-shadow rounded-[20px] bg-surface p-4 sm:p-[18px]"
+            >
+              <div
+                className={`inline-flex h-12 w-12 items-center justify-center rounded-[14px] ${card.iconClassName}`}
+              >
+                <Icon />
+              </div>
+              <h2 className="mt-4 text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+                {card.title}
+              </h2>
+              <p className="mt-2 text-xs leading-5 text-muted sm:text-sm sm:leading-6">
+                {card.description}
+              </p>
+            </article>
+          );
+        })}
       </section>
     </main>
   );
