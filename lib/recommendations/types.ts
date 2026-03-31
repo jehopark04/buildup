@@ -24,6 +24,7 @@ export type RecommendationBreakdown = {
   recruitmentStatusScore: number;
   activityTypeScore: number;
   rawScore: number;
+  rankingScore: number;
   confidence: RecommendationConfidence;
   rawTier: RecommendationTier;
   confidenceTier: RecommendationTier;

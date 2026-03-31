@@ -16,7 +16,7 @@ function buildRecommendationMatch(
 ): RecommendationMatch {
   const fit = getRecommendationFit(profile, activity);
   const scoreResult = getRecommendationScoreResult(activity, fit);
-  const rawTier = getRawTierFromScore(scoreResult.score);
+  const rawTier = getRawTierFromScore(scoreResult.breakdown.rawScore);
   const constraints = getRecommendationEligibility(profile, activity);
   const decision = buildRecommendationDecision(
     rawTier,

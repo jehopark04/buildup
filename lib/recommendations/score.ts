@@ -26,14 +26,11 @@ export function getRecommendationScoreResult(
     getRecruitmentStatusPriority(activity.recruitmentStatus) * statusWeight +
     (activity.recruitmentStatus === "open" ? openStatusBonus : 0);
   const activityTypeScore = fit.typeMatched ? activityTypeMatchBonus : 0;
-  const rawScore =
-    gradeScore +
-    levelScore +
-    recruitmentStatusScore +
-    activityTypeScore;
+  const rawScore = gradeScore + levelScore + recruitmentStatusScore;
+  const rankingScore = rawScore + activityTypeScore;
 
   return {
-    score: rawScore,
+    score: rankingScore,
     confidence,
     breakdown: {
       gradeFit: fit.gradeFit,
@@ -43,6 +40,7 @@ export function getRecommendationScoreResult(
       recruitmentStatusScore,
       activityTypeScore,
       rawScore,
+      rankingScore,
       confidence,
       rawTier: "notNow",
       confidenceTier: "notNow",
