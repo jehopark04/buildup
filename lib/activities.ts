@@ -1,3 +1,4 @@
+import { defineActivityCatalog } from "@/lib/activities.validation";
 import type { ActivityType, Grade, Level, Track } from "@/lib/profile";
 
 export type ActivityCategory =
@@ -37,6 +38,7 @@ export type Activity = {
   recruitmentStatus: RecruitmentStatus;
   scheduleText: string;
   deadlineText?: string;
+  // Manual verification date for this specific source link.
   lastVerifiedAt: string;
   isKauInternal: boolean;
   eligibility?: ActivityEligibility;
@@ -46,9 +48,7 @@ export type Activity = {
   activityTypes: ActivityType[];
 };
 
-const verifiedAt = "2026-03-30";
-
-export const activityCatalog: Activity[] = [
+export const activityCatalog: Activity[] = defineActivityCatalog([
   {
     id: "kau-student-activity-board",
     title: "항공대 AI융합대학 학생 참여 활동 보드",
@@ -68,7 +68,7 @@ export const activityCatalog: Activity[] = [
     sourceUrl: "https://aisw.kau.ac.kr/pages/student_02.php?code=s7201",
     recruitmentStatus: "rolling",
     scheduleText: "학기 중과 방학 시즌 모두 수시 공지",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: true,
     tracks: ["frontend", "backend", "product", "design", "ai"],
     grades: ["freshman", "sophomore", "junior", "senior"],
@@ -94,7 +94,7 @@ export const activityCatalog: Activity[] = [
     sourceUrl: "https://research.kau.ac.kr/info/info_021.php",
     recruitmentStatus: "rolling",
     scheduleText: "학기 시작 전후 공고 확인 권장",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: true,
     tracks: ["frontend", "backend", "product", "ai"],
     grades: ["junior", "senior"],
@@ -120,7 +120,7 @@ export const activityCatalog: Activity[] = [
     sourceUrl: "https://career.kau.ac.kr/",
     recruitmentStatus: "rolling",
     scheduleText: "현장실습·인턴 공고 수시 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: true,
     tracks: ["frontend", "backend", "product", "design", "ai"],
     grades: ["junior", "senior"],
@@ -147,7 +147,7 @@ export const activityCatalog: Activity[] = [
       "https://aisw.kau.ac.kr/pages/student_02.php?code=s7201&mode=read&page=7&searchkey=&searchvalue=&seq=111",
     recruitmentStatus: "rolling",
     scheduleText: "학기 중·방학 프로젝트 공고 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: true,
     tracks: ["frontend", "backend", "product", "design"],
     grades: ["sophomore", "junior", "senior"],
@@ -173,7 +173,7 @@ export const activityCatalog: Activity[] = [
     sourceUrl: "https://aisw.kau.ac.kr/pages/professor.php",
     recruitmentStatus: "rolling",
     scheduleText: "연구실별 수시 문의, 학기 시작 전후 확인 권장",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: true,
     tracks: ["backend", "ai"],
     grades: ["junior", "senior"],
@@ -200,7 +200,7 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 기수 모집 공지 대기",
     deadlineText: "공개SW 포털 차기 공고 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["frontend", "backend", "ai"],
     grades: ["sophomore", "junior", "senior"],
@@ -227,7 +227,7 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 기수 가이드 확인",
     deadlineText: "가이드 페이지 내 차기 공지 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["frontend", "backend"],
     grades: ["junior", "senior"],
@@ -254,7 +254,7 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 기수 가이드 확인",
     deadlineText: "가이드 페이지 내 차기 공지 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["backend", "ai"],
     grades: ["junior", "senior"],
@@ -281,7 +281,7 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 기수 모집 일정 확인",
     deadlineText: "SSAFY 공식 모집 공지 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["frontend", "backend", "ai"],
     grades: ["senior"],
@@ -308,7 +308,7 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 기수 모집 공지 대기",
     deadlineText: "SOPT makers 모집 페이지 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["frontend", "backend", "product", "design"],
     grades: ["sophomore", "junior", "senior"],
@@ -334,7 +334,7 @@ export const activityCatalog: Activity[] = [
     sourceUrl: "https://www.kmooc.kr/view/course/detail/7534",
     recruitmentStatus: "rolling",
     scheduleText: "수강 가능 기간 내 학습 진행",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["backend", "ai"],
     grades: ["freshman", "sophomore", "junior", "senior"],
@@ -360,7 +360,7 @@ export const activityCatalog: Activity[] = [
     sourceUrl: "https://www.kmooc.kr/view/course/detail/16998",
     recruitmentStatus: "rolling",
     scheduleText: "수강 가능 기간 내 학습 진행",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["product", "design"],
     grades: ["freshman", "sophomore", "junior", "senior"],
@@ -387,7 +387,7 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 연례 공고 확인",
     deadlineText: "공공데이터포털 공고 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["backend", "product", "ai"],
     grades: ["sophomore", "junior", "senior"],
@@ -414,14 +414,14 @@ export const activityCatalog: Activity[] = [
     recruitmentStatus: "upcoming",
     scheduleText: "차기 대회 공지 확인",
     deadlineText: "공개SW 포털 대회 공고 확인",
-    lastVerifiedAt: verifiedAt,
+    lastVerifiedAt: "2026-03-30",
     isKauInternal: false,
     tracks: ["frontend", "backend", "ai"],
     grades: ["sophomore", "junior", "senior"],
     levels: ["project", "ready"],
     activityTypes: ["contest", "opensource"],
   },
-];
+]);
 
 export function getActivityById(id: string) {
   return activityCatalog.find((activity) => activity.id === id) ?? null;
