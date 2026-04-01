@@ -10,6 +10,7 @@ type LayoutShellProps = {
 export function LayoutShell({ children }: LayoutShellProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const hideHeaderActions = isHome || pathname === "/onboarding";
 
   return (
     <div
@@ -28,7 +29,7 @@ export function LayoutShell({ children }: LayoutShellProps) {
         >
           BUILDUP
         </Link>
-        {!isHome ? (
+        {!hideHeaderActions ? (
           <nav className="flex flex-wrap gap-2 text-sm font-medium">
             <Link
               href="/onboarding"

@@ -140,9 +140,6 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
         <div className="space-y-1">
           <p className="text-sm font-semibold text-accent">04</p>
           <h2 className="text-xl font-semibold tracking-tight">관심 활동 유형</h2>
-          <p className="text-sm leading-6 text-muted">
-            전체를 두면 직무 기준으로만 보고, 특정 유형을 고르면 같은 tier 안에서만 살짝 위로 올립니다.
-          </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {activityTypeOptions.map((option) => (
@@ -165,14 +162,19 @@ export function OnboardingForm({ defaults }: OnboardingFormProps) {
       </section>
 
       <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-6 text-muted">
-          희망 직무만 입력해도 기본 추천은 볼 수 있고, 학년과 현재 수준까지 입력하면 정밀 추천으로 다시 나눕니다.
+        <p className="text-sm leading-6 text-muted sm:flex-1">
+          <span className="block">
+            희망 직무만 입력해도 기본적인 추천을 볼 수 있어요!
+          </span>
+          <span className="mt-1 block">
+            학년과 현재 수준을 입력하면 정밀 추천으로 정밀도 있게 볼 수 있습니다.
+          </span>
         </p>
         <button
           type="submit"
-          className="inline-flex items-center justify-center rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white hover:-translate-y-0.5 hover:bg-brand/92"
+          className="inline-flex min-w-36 shrink-0 items-center justify-center rounded-full bg-brand px-7 py-3 text-sm font-semibold whitespace-nowrap text-white hover:-translate-y-0.5 hover:bg-brand/92"
         >
-          {isPreciseRecommendation ? "정밀 추천 보기" : "기본 추천 보기"}
+          {isPreciseRecommendation ? "정밀추천" : "기본추천"}
         </button>
       </div>
     </form>
