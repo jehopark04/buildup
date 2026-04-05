@@ -11,7 +11,6 @@ describe("recommendation engine baseline", () => {
       track: null,
       grade: "junior",
       level: "project",
-      activityTypes: ["all"],
     };
 
     expect(getRecommendedActivities(profile)).toEqual([]);
@@ -23,7 +22,6 @@ describe("recommendation engine baseline", () => {
       track: "frontend",
       grade: "junior",
       level: "project",
-      activityTypes: ["all"],
     };
 
     const recommendation = getRecommendationForActivity(profile, "kau-project-x");
@@ -39,7 +37,6 @@ describe("recommendation engine baseline", () => {
       track: "frontend",
       grade: "junior",
       level: "project",
-      activityTypes: ["all"],
     };
 
     const recommendations = getRecommendedActivities(profile);

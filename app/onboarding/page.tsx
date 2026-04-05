@@ -35,7 +35,7 @@ export default async function OnboardingPage({
           <ul className="space-y-2 text-sm leading-6 text-muted">
             <li>희망 직무만 넣어도 추천은 바로 시작돼요</li>
             <li>학년과 현재 수준을 더하면 지금 해볼 활동이 더 또렷해져요</li>
-            <li>관심 활동 유형은 추천 순서를 가볍게 다듬는 데 반영돼요</li>
+            <li>기본 추천은 직무와 맞는 활동을 먼저 한 번에 보여줘요</li>
           </ul>
         </div>
       </section>

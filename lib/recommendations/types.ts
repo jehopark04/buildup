@@ -1,5 +1,4 @@
 import type { Activity } from "@/lib/activities";
-import type { ActivityType } from "@/lib/profile";
 
 export type RecommendationTier = "best" | "conditional" | "notNow";
 export type FitState = "fit" | "near" | "far" | "unknown";
@@ -12,8 +11,6 @@ export type RecommendationDecisionLimiter =
 export type RecommendationFit = {
   gradeFit: FitState;
   levelFit: FitState;
-  normalizedTypes: ActivityType[];
-  typeMatched: boolean;
 };
 
 export type RecommendationBreakdown = {
@@ -22,7 +19,6 @@ export type RecommendationBreakdown = {
   gradeScore: number;
   levelScore: number;
   recruitmentStatusScore: number;
-  activityTypeScore: number;
   rawScore: number;
   rankingScore: number;
   confidence: RecommendationConfidence;

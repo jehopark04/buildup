@@ -1,6 +1,5 @@
 import type { Activity } from "@/lib/activities";
 import {
-  normalizeActivityTypes,
   type Grade,
   type Level,
   type UserProfile,
@@ -48,16 +47,10 @@ export function getRecommendationFit(
 ): RecommendationFit {
   const gradeFit = getFitState(profile.grade, activity.grades, gradeRank);
   const levelFit = getFitState(profile.level, activity.levels, levelRank);
-  const normalizedTypes = normalizeActivityTypes(profile.activityTypes);
-  const typeMatched =
-    !normalizedTypes.includes("all") &&
-    normalizedTypes.some((activityType) => activity.activityTypes.includes(activityType));
 
   return {
     gradeFit,
     levelFit,
-    normalizedTypes,
-    typeMatched,
   };
 }
 

@@ -1,6 +1,5 @@
 import { getRecruitmentStatusPriority, type Activity } from "@/lib/activities";
 import {
-  activityTypeMatchBonus,
   fitScoreMap,
   openStatusBonus,
   statusWeight,
@@ -25,9 +24,8 @@ export function getRecommendationScoreResult(
   const recruitmentStatusScore =
     getRecruitmentStatusPriority(activity.recruitmentStatus) * statusWeight +
     (activity.recruitmentStatus === "open" ? openStatusBonus : 0);
-  const activityTypeScore = fit.typeMatched ? activityTypeMatchBonus : 0;
   const rawScore = gradeScore + levelScore + recruitmentStatusScore;
-  const rankingScore = rawScore + activityTypeScore;
+  const rankingScore = rawScore;
 
   return {
     score: rankingScore,
@@ -38,7 +36,6 @@ export function getRecommendationScoreResult(
       gradeScore,
       levelScore,
       recruitmentStatusScore,
-      activityTypeScore,
       rawScore,
       rankingScore,
       confidence,

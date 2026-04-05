@@ -45,7 +45,6 @@ export type UserProfile = {
   track: Track | null;
   grade: Grade | null;
   level: Level | null;
-  activityTypes: ActivityType[];
 };
 
 type SearchParamsMap = Record<string, string | string[] | undefined>;
@@ -54,21 +53,11 @@ export const emptyProfile: UserProfile = {
   track: null,
   grade: null,
   level: null,
-  activityTypes: ["all"],
 };
 
 const trackValues = new Set(trackOptions.map((option) => option.value));
 const gradeValues = new Set(gradeOptions.map((option) => option.value));
 const levelValues = new Set(levelOptions.map((option) => option.value));
-const activityTypeValues = new Set(activityTypeOptions.map((option) => option.value));
-
-function normalizeArray(value: string | string[] | undefined) {
-  if (!value) {
-    return [];
-  }
-
-  return Array.isArray(value) ? value : [value];
-}
 
 export function isTrack(value: string): value is Track {
   return trackValues.has(value as Track);
@@ -82,18 +71,6 @@ export function isLevel(value: string): value is Level {
   return levelValues.has(value as Level);
 }
 
-export function isActivityType(value: string): value is ActivityType {
-  return activityTypeValues.has(value as ActivityType);
-}
-
-export function normalizeActivityTypes(activityTypes: ActivityType[]) {
-  if (activityTypes.length === 0 || activityTypes.includes("all")) {
-    return ["all"] as ActivityType[];
-  }
-
-  return Array.from(new Set(activityTypes));
-}
-
 export function buildProfileFromSearchParams(
   params: SearchParamsMap,
 ): UserProfile {
@@ -103,15 +80,11 @@ export function buildProfileFromSearchParams(
     typeof params.grade === "string" && isGrade(params.grade) ? params.grade : null;
   const level =
     typeof params.level === "string" && isLevel(params.level) ? params.level : null;
-  const activityTypes = normalizeActivityTypes(
-    normalizeArray(params.activityTypes).filter(isActivityType),
-  );
 
   return {
     track,
     grade,
     level,
-    activityTypes,
   };
 }
 
@@ -128,10 +101,6 @@ export function buildProfileSearchParams(profile: UserProfile) {
 
   if (profile.level) {
     params.set("level", profile.level);
-  }
-
-  for (const activityType of normalizeActivityTypes(profile.activityTypes)) {
-    params.append("activityTypes", activityType);
   }
 
   return params.toString();
@@ -194,12 +163,5 @@ export function getProfileSummary(profile: UserProfile) {
     `희망 직무: ${getTrackLabel(profile.track)}`,
     `현재 학년: ${getGradeLabel(profile.grade)}`,
     `현재 수준: ${getLevelLabel(profile.level)}`,
-    `관심 활동 유형: ${
-      normalizeActivityTypes(profile.activityTypes).includes("all")
-        ? "전체"
-        : normalizeActivityTypes(profile.activityTypes)
-            .map(getActivityTypeLabel)
-            .join(", ")
-    }`,
   ];
 }

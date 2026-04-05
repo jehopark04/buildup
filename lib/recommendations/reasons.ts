@@ -216,9 +216,7 @@ export function getRecommendationReasonParts(
     result.decision.limitedBy.includes("confidence")
       ? null
       : getConfidenceReason(result.breakdown.confidence),
-    fit.typeMatched
-      ? "관심 활동 유형과도 맞아 같은 tier 안에서는 우선순위를 높였습니다."
-      : getStatusReason(activity),
+    getStatusReason(activity),
     ...(
       result.constraints?.blocked ||
       result.breakdown.rawTier !== result.breakdown.finalTier
