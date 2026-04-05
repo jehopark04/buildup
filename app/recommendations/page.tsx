@@ -1,12 +1,10 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { RecommendationCard } from "@/components/recommendation-card";
-import { kauShortcutLinks } from "@/lib/kau-links";
 import {
   buildProfileFromSearchParams,
   buildProfileSearchParams,
   getRecommendationInputState,
-  getProfileSummary,
   getTrackLabel,
   hasRecommendationTrack,
   hasCompleteProfile,
@@ -33,20 +31,15 @@ export default async function RecommendationsPage({
   const editHref = (
     profileQuery ? `/onboarding?${profileQuery}` : "/onboarding"
   ) as Route;
+  const kauHubHref = (
+    profileQuery ? `/kau-hub?${profileQuery}` : "/kau-hub"
+  ) as Route;
   const sections = ready ? getRecommendationSections(profile) : [];
   const trackLabel = getTrackLabel(profile.track);
   const missingDetails = [
     !profile.grade ? "학년" : null,
     !profile.level ? "현재 수준" : null,
   ].filter((item): item is string => Boolean(item));
-  const groupedLinks = kauShortcutLinks.reduce<Record<string, typeof kauShortcutLinks>>(
-    (accumulator, link) => {
-      const current = accumulator[link.group] ?? [];
-      accumulator[link.group] = [...current, link];
-      return accumulator;
-    },
-    {},
-  );
   const heroByState = {
     missingTrack: {
       badge: "추천 준비 전",
@@ -56,105 +49,58 @@ export default async function RecommendationsPage({
     },
     trackOnly: {
       badge: "기본 추천",
-      title: `${trackLabel} 관련 활동을\n먼저 추렸습니다.`,
+      title: `${trackLabel} 활동,\n이곳에 모아두었습니다.`,
       description:
         "지금은 희망 직무만 반영한 기본 추천입니다. 학년과 현재 수준을 넣으면 더 정밀하게 다시 나눕니다.",
     },
     partial: {
       badge: "부분 입력 추천",
-      title: `${trackLabel} 관련 활동을\n부분 입력 기준으로 정리했습니다.`,
+      title: `${trackLabel} 활동,\n이곳에 모아두었습니다.`,
       description:
         "입력된 정보만 반영해 먼저 정리했습니다. 학년과 현재 수준을 모두 채우면 추천 신뢰도가 더 올라갑니다.",
     },
     precise: {
       badge: "정밀 추천",
-      title: `${trackLabel} 관련 활동만\n학년과 수준 기준으로 나눴습니다.`,
+      title: `${trackLabel} 활동,\n이곳에 모아두었습니다.`,
       description:
         "직무 필터 후 학년과 현재 수준을 함께 반영해 추천 / 조건부 추천 / 비추천을 정리했습니다.",
     },
   } as const;
   const hero = heroByState[inputState];
-  const confidenceCopy =
-    inputState === "precise"
-      ? "추천 신뢰도 높음"
-      : inputState === "partial"
-        ? "추천 신뢰도 중간"
-        : inputState === "trackOnly"
-          ? "추천 신뢰도 낮음"
-          : "직무 입력 필요";
-
   return (
-    <main className="space-y-8">
-      <section className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr]">
-        <div className="card-shadow rounded-[30px] border border-line bg-surface p-6">
+    <main className="space-y-6">
+      <section className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-start">
+        <div className="px-1 py-3">
           <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
             {hero.badge}
           </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+          <h1 className="mt-4 max-w-3xl text-xl font-semibold leading-tight tracking-tight sm:text-2xl lg:text-3xl">
             {hero.title.split("\n").map((line) => (
               <span key={line} className="block">
                 {line}
               </span>
             ))}
           </h1>
-          <div className="mt-6 space-y-3">
-            {getProfileSummary(profile).map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-line bg-white px-4 py-3 text-sm"
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 rounded-2xl bg-surface-strong p-4 text-sm leading-6 text-muted">
-            <p>{hero.description}</p>
-            <p className="mt-3 font-medium text-foreground">{confidenceCopy}</p>
-            {!isPrecise && hasTrack ? (
-              <p className="mt-2">
-                {missingDetails.join(", ")} 정보를 더 입력하면 결과 순서와 설명이 더 정확해집니다.
-              </p>
-            ) : null}
-          </div>
+          {!isPrecise && hasTrack ? (
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-muted sm:text-base">
+              {missingDetails.join(", ")} 정보를 더 입력하면 결과 순서와 설명이 더 정확해집니다.
+            </p>
+          ) : null}
         </div>
 
-        <section className="card-shadow rounded-[30px] border border-line bg-white p-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
-            KAU Hub
-          </p>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-            한국항공대학교 활동 바로가기
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            학내 공지와 학생 참여 채널을 한 번에 모아둔 허브입니다.
-          </p>
-
-          <div className="mt-6 space-y-5">
-            {Object.entries(groupedLinks).map(([group, links]) =>
-              links ? (
-                <div key={group} className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted">
-                    {group}
-                  </p>
-                  <div className="grid gap-3">
-                    {links.map((link) => (
-                      <a
-                        key={link.title}
-                        href={link.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-2xl border border-line bg-surface px-4 py-4 hover:border-foreground/15 hover:bg-white"
-                      >
-                        <p className="text-sm font-semibold text-foreground">{link.title}</p>
-                        <p className="mt-1 text-sm leading-6 text-muted">{link.description}</p>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ) : null,
-            )}
-          </div>
-        </section>
+        <Link href={kauHubHref} className="block">
+          <section className="card-shadow rounded-[30px] border border-line bg-white p-6 transition hover:-translate-y-1">
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
+              KAU Hub
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight">
+              한국항공대학교 활동 바로가기
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              학내 공지와 학생 참여 채널을 한 번에 모아둔 허브입니다.
+            </p>
+          </section>
+        </Link>
       </section>
 
       {!ready ? (
@@ -211,53 +157,44 @@ export default async function RecommendationsPage({
             </section>
           ) : null}
           {sections.map((section) => {
-            const isBestRow = section.tier === "best";
+            const showSectionDescription = section.tier === "notNow";
 
             return (
-              <section key={section.tier} className="space-y-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <section
+                key={section.tier}
+                className={showSectionDescription ? "space-y-4" : "space-y-3"}
+              >
+                <div
+                  className={`flex flex-col sm:flex-row sm:justify-between ${showSectionDescription ? "gap-2 sm:items-end" : "gap-1 sm:items-center"}`}
+                >
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.28em] text-accent">
                       {section.title}
                     </p>
-                    <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                      {section.description}
-                    </h2>
+                    {showSectionDescription ? (
+                      <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                        {section.description}
+                      </h2>
+                    ) : null}
                   </div>
                   <p className="text-sm text-muted">
                     {section.items.length}개 활동
-                    {isBestRow ? " · 좌우로 넘겨보세요" : ""}
                   </p>
                 </div>
 
-                {isBestRow ? (
-                  <div className="-mx-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory">
-                    <div className="flex min-w-full gap-4">
-                      {section.items.map((activity) => (
-                        <RecommendationCard
-                          key={activity.id}
-                          activity={activity}
-                          tier={section.tier}
-                          trackLabel={trackLabel}
-                          profileQuery={profileQuery}
-                          className="w-[320px] shrink-0 snap-start sm:w-[360px]"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid gap-4 xl:grid-cols-2">
+                <div className="-mx-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory">
+                  <div className="flex min-w-full gap-4">
                     {section.items.map((activity) => (
                       <RecommendationCard
                         key={activity.id}
                         activity={activity}
                         tier={section.tier}
-                        trackLabel={trackLabel}
                         profileQuery={profileQuery}
+                        className="w-[320px] shrink-0 snap-start sm:w-[360px]"
                       />
                     ))}
                   </div>
-                )}
+                </div>
               </section>
             );
           })}

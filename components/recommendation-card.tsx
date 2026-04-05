@@ -1,11 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
-import {
-  formatVerifiedDate,
-  getRecruitmentStatusLabel,
-  type RecruitmentStatus,
-} from "@/lib/activities";
-import { getActivityTypeLabel } from "@/lib/profile";
+import { getRecruitmentStatusLabel, type RecruitmentStatus } from "@/lib/activities";
 import type {
   RecommendationMatch,
   RecommendationTier,
@@ -14,7 +9,6 @@ import type {
 type RecommendationCardProps = {
   activity: RecommendationMatch;
   tier: RecommendationTier;
-  trackLabel: string;
   profileQuery?: string;
   className?: string;
 };
@@ -46,7 +40,6 @@ const statusBadges: Record<RecruitmentStatus, string> = {
 export function RecommendationCard({
   activity,
   tier,
-  trackLabel,
   profileQuery,
   className,
 }: RecommendationCardProps) {
@@ -70,59 +63,27 @@ export function RecommendationCard({
           >
             {getRecruitmentStatusLabel(activity.recruitmentStatus)}
           </span>
+          <span className="rounded-full border border-line px-3 py-1 text-xs text-muted">
+            {activity.category}
+          </span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="rounded-full border border-line px-3 py-1 text-xs text-muted">
+            예상 소요시간 {activity.estimatedTime}
+          </span>
           {activity.isKauInternal ? (
             <span className="rounded-full border border-line px-3 py-1 text-xs text-muted">
               항공대 내부
             </span>
           ) : null}
-          <span className="rounded-full border border-line px-3 py-1 text-xs text-muted">
-            {activity.category}
-          </span>
-          <span className="rounded-full border border-line px-3 py-1 text-xs text-muted">
-            예상 소요시간 {activity.estimatedTime}
-          </span>
         </div>
 
-        <div className="mt-5 space-y-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-              {trackLabel} 관련 활동
-            </p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight">{activity.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-muted">{activity.summary}</p>
-          </div>
-          <div className="space-y-2">
-            {activity.reasons.map((reason) => (
-              <p
-                key={reason}
-                className="rounded-2xl bg-surface-strong px-4 py-3 text-sm leading-6 text-foreground"
-              >
-                {reason}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-5 flex flex-wrap gap-2">
-          {activity.activityTypes.map((activityType) => (
-            <span
-              key={`${activity.id}-${activityType}`}
-              className="rounded-full border border-line px-3 py-1 text-xs text-muted"
-            >
-              {getActivityTypeLabel(activityType)}
-            </span>
-          ))}
-        </div>
-
-        <div className="mt-6 flex items-center justify-between border-t border-line pt-5 text-sm">
-          <div className="space-y-1">
-            <p className="font-medium text-foreground">다음 액션</p>
-            <p className="text-muted">{activity.nextStep}</p>
-            <p className="text-xs text-muted">
-              최종 확인 {formatVerifiedDate(activity.lastVerifiedAt)}
-            </p>
-          </div>
-          <span className="font-semibold text-brand">상세 보기</span>
+        <div className="mt-6">
+          <h3 className="text-2xl font-semibold tracking-tight">{activity.title}</h3>
+          <p className="mt-4 overflow-hidden text-base leading-8 text-muted [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]">
+            {activity.summary}
+          </p>
         </div>
       </article>
     </Link>
