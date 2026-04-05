@@ -9,7 +9,10 @@ import {
   hasRecommendationTrack,
   hasCompleteProfile,
 } from "@/lib/profile";
-import { getRecommendationSections } from "@/lib/recommendations";
+import {
+  getRecommendationDisplaySections,
+  shouldUseUnifiedRecommendationPresentation,
+} from "@/lib/recommendations/presentation";
 
 type RecommendationsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -27,6 +30,8 @@ export default async function RecommendationsPage({
   const ready = hasTrack;
   const isPrecise = hasCompleteProfile(profile);
   const inputState = getRecommendationInputState(profile);
+  const isTrackOnlyRecommendation =
+    shouldUseUnifiedRecommendationPresentation(inputState);
   const profileQuery = buildProfileSearchParams(profile);
   const editHref = (
     profileQuery ? `/onboarding?${profileQuery}` : "/onboarding"
@@ -34,7 +39,7 @@ export default async function RecommendationsPage({
   const kauHubHref = (
     profileQuery ? `/kau-hub?${profileQuery}` : "/kau-hub"
   ) as Route;
-  const sections = ready ? getRecommendationSections(profile) : [];
+  const sections = ready ? getRecommendationDisplaySections(profile) : [];
   const trackLabel = getTrackLabel(profile.track);
   const missingDetails = [
     !profile.grade ? "학년" : null,
@@ -145,7 +150,7 @@ export default async function RecommendationsPage({
               </h2>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
                 {inputState === "trackOnly"
-                  ? "희망 직무만으로 관련 활동을 먼저 추렸습니다. 학년과 현재 수준을 추가하면 추천 / 조건부 추천 / 비추천의 경계가 더 정확해집니다."
+                  ? "희망 직무만으로 관련 활동을 먼저 모아 보여주고 있습니다. 학년과 현재 수준을 추가하면 정밀 추천으로 더 세밀하게 나눌 수 있습니다."
                   : `${missingDetails.join(", ")} 정보가 빠져 있어 일부 조건만 반영했습니다. 남은 정보를 채우면 추천 신뢰도와 이유 설명이 더 또렷해집니다.`}
               </p>
               <Link
@@ -157,11 +162,12 @@ export default async function RecommendationsPage({
             </section>
           ) : null}
           {sections.map((section) => {
-            const showSectionDescription = section.tier === "notNow";
+            const showSectionDescription =
+              section.tier === "trackOnly" || section.tier === "notNow";
 
             return (
               <section
-                key={section.tier}
+                key={section.id}
                 className={showSectionDescription ? "space-y-4" : "space-y-3"}
               >
                 <div
@@ -188,9 +194,11 @@ export default async function RecommendationsPage({
                       <RecommendationCard
                         key={activity.id}
                         activity={activity}
-                        tier={section.tier}
+                        tier={activity.finalTier}
                         profileQuery={profileQuery}
+                        badgeLabel={isTrackOnlyRecommendation ? "활동 추천" : undefined}
                         className="w-[320px] shrink-0 snap-start sm:w-[360px]"
+                        presentation={isTrackOnlyRecommendation ? "unified" : "tiered"}
                       />
                     ))}
                   </div>

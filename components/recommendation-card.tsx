@@ -11,6 +11,8 @@ type RecommendationCardProps = {
   tier: RecommendationTier;
   profileQuery?: string;
   className?: string;
+  badgeLabel?: string;
+  presentation?: "tiered" | "unified";
 };
 
 const tierStyles: Record<RecommendationTier, string> = {
@@ -31,6 +33,9 @@ const tierNames: Record<RecommendationTier, string> = {
   notNow: "지금은 비추천",
 };
 
+const unifiedCardStyle = "border-line bg-white";
+const unifiedBadgeStyle = "bg-accent text-white";
+
 const statusBadges: Record<RecruitmentStatus, string> = {
   open: "bg-emerald-500/12 text-emerald-700 border border-emerald-500/20",
   upcoming: "bg-amber-500/12 text-amber-700 border border-amber-500/20",
@@ -42,21 +47,29 @@ export function RecommendationCard({
   tier,
   profileQuery,
   className,
+  badgeLabel,
+  presentation = "tiered",
 }: RecommendationCardProps) {
   const detailHref = (
     profileQuery
       ? `/activities/${activity.id}?${profileQuery}`
       : `/activities/${activity.id}`
   ) as Route;
+  const isUnified = presentation === "unified";
+  const cardStyle = isUnified ? unifiedCardStyle : tierStyles[tier];
+  const resolvedBadgeLabel = badgeLabel ?? tierNames[tier];
+  const resolvedBadgeStyle = isUnified ? unifiedBadgeStyle : tierBadges[tier];
 
   return (
     <Link href={detailHref} className={`block ${className ?? ""}`.trim()}>
       <article
-        className={`card-shadow h-full rounded-[30px] border p-6 transition hover:-translate-y-1 ${tierStyles[tier]}`}
+        className={`card-shadow h-full rounded-[30px] border p-6 transition hover:-translate-y-1 ${cardStyle}`}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${tierBadges[tier]}`}>
-            {tierNames[tier]}
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${resolvedBadgeStyle}`}
+          >
+            {resolvedBadgeLabel}
           </span>
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadges[activity.recruitmentStatus]}`}
