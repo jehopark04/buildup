@@ -41,7 +41,6 @@ describe("recommendation rules baseline", () => {
       track: "frontend",
       grade: "freshman",
       level: "project",
-      activityTypes: ["all"],
     };
     const activity: Activity = {
       ...baseActivity,
@@ -66,7 +65,6 @@ describe("recommendation rules baseline", () => {
       track: "frontend",
       grade: "junior",
       level: "project",
-      activityTypes: ["all"],
     };
     const activity: Activity = {
       ...baseActivity,

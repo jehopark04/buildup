@@ -27,4 +27,3 @@ export const fitScoreMap: Record<
 
 export const statusWeight = 0.5;
 export const openStatusBonus = 0.5;
-export const activityTypeMatchBonus = 0.5;

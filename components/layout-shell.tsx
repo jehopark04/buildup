@@ -10,7 +10,8 @@ type LayoutShellProps = {
 export function LayoutShell({ children }: LayoutShellProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
-  const hideHeaderActions = isHome || pathname === "/onboarding";
+  const isActivityDetail = pathname.startsWith("/activities/");
+  const hideHeaderActions = isHome || pathname === "/onboarding" || isActivityDetail;
 
   return (
     <div

@@ -2,8 +2,14 @@ import { describe, expect, it } from "vitest";
 import type { Activity } from "@/lib/activities";
 import type { UserProfile } from "@/lib/profile";
 import { getRecommendationFit } from "@/lib/recommendations/fit";
-import { getRecommendationScoreResult, sortRecommendationMatches } from "@/lib/recommendations/score";
-import { buildRecommendationDecision, getRawTierFromScore } from "@/lib/recommendations/tier";
+import {
+  getRecommendationScoreResult,
+  sortRecommendationMatches,
+} from "@/lib/recommendations/score";
+import {
+  buildRecommendationDecision,
+  getRawTierFromScore,
+} from "@/lib/recommendations/tier";
 import type { RecommendationMatch } from "@/lib/recommendations/types";
 
 const baseActivity: Activity = {
@@ -62,70 +68,52 @@ function toMatch(
   };
 }
 
-describe("activity type bonus scoring", () => {
-  it("does not change the final tier", () => {
-    const profileWithoutTypeMatch: UserProfile = {
+describe("recommendation scoring", () => {
+  it("uses only grade, level, and recruitment status in score calculation", () => {
+    const profile: UserProfile = {
       track: "frontend",
       grade: null,
       level: "ready",
-      activityTypes: ["all"],
-    };
-    const profileWithTypeMatch: UserProfile = {
-      ...profileWithoutTypeMatch,
-      activityTypes: ["project"],
     };
     const activity: Activity = {
       ...baseActivity,
       levels: ["project"],
     };
 
-    const withoutTypeMatch = getRecommendationScoreResult(
+    const result = getRecommendationScoreResult(
       activity,
-      getRecommendationFit(profileWithoutTypeMatch, activity),
-    );
-    const withTypeMatch = getRecommendationScoreResult(
-      activity,
-      getRecommendationFit(profileWithTypeMatch, activity),
-    );
-    const tierWithoutTypeMatch = buildRecommendationDecision(
-      getRawTierFromScore(withoutTypeMatch.breakdown.rawScore),
-      withoutTypeMatch.confidence,
-    );
-    const tierWithTypeMatch = buildRecommendationDecision(
-      getRawTierFromScore(withTypeMatch.breakdown.rawScore),
-      withTypeMatch.confidence,
+      getRecommendationFit(profile, activity),
     );
 
-    expect(withoutTypeMatch.breakdown.rawScore).toBe(2.5);
-    expect(withTypeMatch.breakdown.rawScore).toBe(2.5);
-    expect(withoutTypeMatch.score).toBe(2.5);
-    expect(withTypeMatch.score).toBe(3);
-    expect(tierWithoutTypeMatch.finalTier).toBe("notNow");
-    expect(tierWithTypeMatch.finalTier).toBe("notNow");
+    expect(result.breakdown.gradeScore).toBe(0.5);
+    expect(result.breakdown.levelScore).toBe(2);
+    expect(result.breakdown.recruitmentStatusScore).toBe(0);
+    expect(result.breakdown.rawScore).toBe(2.5);
+    expect(result.breakdown.rankingScore).toBe(2.5);
+    expect(result.score).toBe(2.5);
   });
 
-  it("only improves ordering within the same tier", () => {
-    const profileWithoutTypeMatch: UserProfile = {
+  it("falls back to recency when tier and score are tied", () => {
+    const profile: UserProfile = {
       track: "frontend",
-      grade: null,
-      level: "ready",
-      activityTypes: ["all"],
+      grade: "junior",
+      level: "project",
     };
-    const profileWithTypeMatch: UserProfile = {
-      ...profileWithoutTypeMatch,
-      activityTypes: ["project"],
-    };
-    const activity: Activity = {
-      ...baseActivity,
-      levels: ["project"],
-    };
+    const older = toMatch(baseActivity, profile, "older");
+    const newer = toMatch(
+      {
+        ...baseActivity,
+        lastVerifiedAt: "2026-04-10",
+      },
+      profile,
+      "newer",
+    );
 
-    const withoutTypeMatch = toMatch(activity, profileWithoutTypeMatch, "without-type-match");
-    const withTypeMatch = toMatch(activity, profileWithTypeMatch, "with-type-match");
-    const sorted = [withoutTypeMatch, withTypeMatch].sort(sortRecommendationMatches);
+    const sorted = [older, newer].sort(sortRecommendationMatches);
 
-    expect(withoutTypeMatch.finalTier).toBe(withTypeMatch.finalTier);
-    expect(sorted[0].id).toBe("with-type-match");
-    expect(sorted[1].id).toBe("without-type-match");
+    expect(older.finalTier).toBe(newer.finalTier);
+    expect(older.score).toBe(newer.score);
+    expect(sorted[0]?.id).toBe("newer");
+    expect(sorted[1]?.id).toBe("older");
   });
 });

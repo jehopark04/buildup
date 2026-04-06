@@ -9,13 +9,13 @@ export const kauShortcutLinks: KauShortcutLink[] = [
   {
     title: "AI융합대학 학생 참여 활동",
     description: "프로젝트, 대외활동, 내부 프로그램 공지를 가장 먼저 확인하는 기본 채널",
-    url: "https://aisw.kau.ac.kr/pages/student_02.php?code=s7201",
+    url: "http://aisw.kau.ac.kr/pages/student_02.php?code=s7201",
     group: "학생 활동",
   },
   {
     title: "AI융합대학 대학 소식 / 공지",
     description: "학내 행사와 주요 공지를 한 번에 보는 페이지",
-    url: "https://aisw.kau.ac.kr/pages/news.php",
+    url: "http://aisw.kau.ac.kr/pages/news.php",
     group: "학생 활동",
   },
   {
@@ -33,7 +33,7 @@ export const kauShortcutLinks: KauShortcutLink[] = [
   {
     title: "교수·연구실 안내",
     description: "학부연구생이나 연구실 참여를 고려할 때 가장 먼저 보는 페이지",
-    url: "https://aisw.kau.ac.kr/pages/professor.php",
+    url: "http://aisw.kau.ac.kr/pages/professor.php",
     group: "연구 / 산학",
   },
   {
