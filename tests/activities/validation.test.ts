@@ -54,6 +54,16 @@ describe("activity catalog validation", () => {
     );
   });
 
+  it("fails on dangerous URL schemes", () => {
+    expect(() =>
+      defineActivityCatalog([
+        { ...baseActivity, sourceUrl: "javascript:alert('owned')" },
+      ]),
+    ).toThrow(
+      "[activity:sample-activity] sourceUrl: must be a valid absolute http(s) URL",
+    );
+  });
+
   it("fails when eligibility grade bounds are inverted", () => {
     expect(() =>
       defineActivityCatalog([

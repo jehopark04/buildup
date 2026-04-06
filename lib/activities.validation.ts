@@ -1,5 +1,6 @@
 import type { Activity } from "@/lib/activities";
 import { gradeRank, levelRank } from "@/lib/recommendations/constants/fit";
+import { assertSafeExternalHttpUrl } from "@/lib/security/url";
 
 const requiredTextFields = [
   "id",
@@ -19,15 +20,6 @@ const requiredTextFields = [
 
 function isNonEmptyString(value: string | undefined) {
   return typeof value === "string" && value.trim().length > 0;
-}
-
-function isValidHttpUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 function isValidIsoDate(value: string) {
@@ -86,7 +78,9 @@ export function validateActivityCatalog(activities: Activity[]) {
       }
     }
 
-    if (!isValidHttpUrl(activity.sourceUrl)) {
+    try {
+      assertSafeExternalHttpUrl(activity.sourceUrl, "sourceUrl");
+    } catch {
       fail(activity.id, "sourceUrl", "must be a valid absolute http(s) URL");
     }
 

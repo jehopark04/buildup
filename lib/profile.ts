@@ -59,6 +59,16 @@ const trackValues = new Set(trackOptions.map((option) => option.value));
 const gradeValues = new Set(gradeOptions.map((option) => option.value));
 const levelValues = new Set(levelOptions.map((option) => option.value));
 
+function getSingleSearchParam(value: string | string[] | undefined) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim();
+
+  return normalized.length > 0 ? normalized : null;
+}
+
 export function isTrack(value: string): value is Track {
   return trackValues.has(value as Track);
 }
@@ -74,12 +84,12 @@ export function isLevel(value: string): value is Level {
 export function buildProfileFromSearchParams(
   params: SearchParamsMap,
 ): UserProfile {
-  const track =
-    typeof params.track === "string" && isTrack(params.track) ? params.track : null;
-  const grade =
-    typeof params.grade === "string" && isGrade(params.grade) ? params.grade : null;
-  const level =
-    typeof params.level === "string" && isLevel(params.level) ? params.level : null;
+  const trackParam = getSingleSearchParam(params.track);
+  const gradeParam = getSingleSearchParam(params.grade);
+  const levelParam = getSingleSearchParam(params.level);
+  const track = trackParam && isTrack(trackParam) ? trackParam : null;
+  const grade = gradeParam && isGrade(gradeParam) ? gradeParam : null;
+  const level = levelParam && isLevel(levelParam) ? levelParam : null;
 
   return {
     track,
