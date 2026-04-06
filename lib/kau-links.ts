@@ -5,7 +5,17 @@ export type KauShortcutLink = {
   group: "학생 활동" | "진로 / 현장" | "연구 / 산학";
 };
 
-export const kauShortcutLinks: KauShortcutLink[] = [
+import { assertSafeExternalHttpUrl } from "@/lib/security/url";
+
+function defineKauShortcutLinks(links: KauShortcutLink[]) {
+  for (const link of links) {
+    assertSafeExternalHttpUrl(link.url, `kauShortcutLinks.${link.title}`);
+  }
+
+  return links;
+}
+
+export const kauShortcutLinks: KauShortcutLink[] = defineKauShortcutLinks([
   {
     title: "AI융합대학 학생 참여 활동",
     description: "프로젝트, 대외활동, 내부 프로그램 공지를 가장 먼저 확인하는 기본 채널",
@@ -48,4 +58,4 @@ export const kauShortcutLinks: KauShortcutLink[] = [
     url: "https://career.kau.ac.kr/",
     group: "진로 / 현장",
   },
-];
+]);

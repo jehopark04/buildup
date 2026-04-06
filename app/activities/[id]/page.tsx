@@ -24,6 +24,7 @@ import {
   getRecommendationDisplayTierLabel,
   shouldUseUnifiedRecommendationPresentation,
 } from "@/lib/recommendations/presentation";
+import { normalizeActivityIdParam } from "@/lib/security/url";
 
 type ActivityDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -89,7 +90,13 @@ export default async function ActivityDetailPage({
   searchParams,
 }: ActivityDetailPageProps) {
   const { id } = await params;
-  const activity = getActivityById(id);
+  const activityId = normalizeActivityIdParam(id);
+
+  if (!activityId) {
+    notFound();
+  }
+
+  const activity = getActivityById(activityId);
 
   if (!activity) {
     notFound();
