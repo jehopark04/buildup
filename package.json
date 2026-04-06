@@ -2,11 +2,19 @@
   "name": "career-mvp",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
+    "security:scan:secrets": "node scripts/check-secrets.mjs",
+    "security:scan:render": "node scripts/check-dangerous-rendering.mjs",
+    "security:scan": "npm run security:scan:secrets && npm run security:scan:render",
+    "security:audit": "npm audit --audit-level=high",
+    "security:check": "npm run security:scan && npm run lint && npm run typecheck && npm run test:run && npm run build",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run"
