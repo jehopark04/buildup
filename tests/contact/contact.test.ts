@@ -52,6 +52,20 @@ describe("contact helpers", () => {
     ).toBeNull();
   });
 
+  it("returns resend config when all values are configured", () => {
+    expect(
+      getContactConfig({
+        RESEND_API_KEY: "re_test_key",
+        CONTACT_TO_EMAIL: "owner@example.com",
+        CONTACT_FROM_EMAIL: "BUILDUP <onboarding@resend.dev>",
+      }),
+    ).toEqual({
+      apiKey: "re_test_key",
+      toEmail: "owner@example.com",
+      fromEmail: "BUILDUP <onboarding@resend.dev>",
+    });
+  });
+
   it("escapes raw html entities", () => {
     expect(escapeHtml(`Tom & "<Jerry>"`)).toBe("Tom &amp; &quot;&lt;Jerry&gt;&quot;");
   });

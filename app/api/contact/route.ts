@@ -109,18 +109,19 @@ export async function POST(request: NextRequest) {
 
   if (!config) {
     return Response.json(
-      { error: "문의 기능이 아직 설정되지 않았습니다." },
+      { error: "문의 메일 설정이 아직 완료되지 않았습니다." },
       { status: 503 },
     );
   }
 
   const email = buildContactEmail(validation.value.message);
-  const resendResponse = await fetch("https://api.resend.com/emails", {
+  const deliveryResponse = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
       "Content-Type": "application/json",
       "Idempotency-Key": crypto.randomUUID(),
+      "User-Agent": "career-mvp-contact/1.0",
     },
     body: JSON.stringify({
       from: config.fromEmail,
@@ -131,9 +132,26 @@ export async function POST(request: NextRequest) {
     }),
   });
 
-  if (!resendResponse.ok) {
+  if (!deliveryResponse.ok) {
+    let detail = "";
+
+    try {
+      const payload = (await deliveryResponse.json()) as {
+        message?: string;
+        error?: string;
+      };
+
+      detail = payload.message ?? payload.error ?? "";
+    } catch {
+      detail = "";
+    }
+
     return Response.json(
-      { error: "문의 전송에 실패했습니다. 잠시 후 다시 시도해주세요." },
+      {
+        error:
+          detail ||
+          "문의 전송에 실패했습니다. 메일 발신 설정을 확인한 뒤 다시 시도해주세요.",
+      },
       { status: 502 },
     );
   }

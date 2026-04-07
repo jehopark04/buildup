@@ -11,6 +11,23 @@ type ContactFormState =
   | { kind: "success"; message: string }
   | { kind: "error"; message: string };
 
+function SuccessIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-5 w-5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m5.5 12.5 4 4 9-9" />
+    </svg>
+  );
+}
+
 export function ContactForm() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +67,7 @@ export function ContactForm() {
       setMessage("");
       setState({
         kind: "success",
-        message: "문의가 전송되었습니다. 빠르게 확인해볼게요.",
+        message: "문의가 성공적으로 전송되었습니다.",
       });
     } catch {
       setState({
@@ -122,7 +139,14 @@ export function ContactForm() {
               : "border-rose-500/20 bg-rose-500/8 text-rose-700"
           }`}
         >
-          {state.message}
+          {state.kind === "success" ? (
+            <div className="flex items-center gap-3">
+              <SuccessIcon />
+              <span>{state.message}</span>
+            </div>
+          ) : (
+            state.message
+          )}
         </div>
       ) : null}
 

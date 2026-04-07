@@ -2,7 +2,7 @@ export const CONTACT_MESSAGE_MIN_LENGTH = 10;
 export const CONTACT_MESSAGE_MAX_LENGTH = 3000;
 export const CONTACT_PAYLOAD_MAX_BYTES = 8_192;
 
-type ContactConfig = {
+export type ContactConfig = {
   apiKey: string;
   toEmail: string;
   fromEmail: string;
@@ -85,6 +85,7 @@ export function buildContactEmail(message: string, submittedAt = new Date()) {
 
   return {
     subject: `BUILDUP 문의 ${submittedAtLabel}`,
+    submittedAtLabel,
     text: [
       "BUILDUP 문의가 도착했습니다.",
       "",

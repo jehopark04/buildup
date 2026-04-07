@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   },
   description:
     "학생의 희망 직무와 현재 상황을 바탕으로 활동을 추천하는 BUILDUP입니다.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

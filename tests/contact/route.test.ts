@@ -65,6 +65,41 @@ describe("contact route", () => {
     );
   });
 
+  it("returns resend delivery error details when the provider rejects the send", async () => {
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.CONTACT_TO_EMAIL = "owner@example.com";
+    process.env.CONTACT_FROM_EMAIL = "BUILDUP <onboarding@resend.dev>";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: "Test emails can only be sent to your own address." }), {
+          status: 403,
+        }),
+      ),
+    );
+
+    const response = await POST(
+      new Request("https://buildup.test/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          origin: "https://buildup.test",
+          host: "buildup.test",
+          "x-forwarded-for": "127.0.0.1",
+        },
+        body: JSON.stringify({
+          message: "문의 내용을 충분히 길게 적었습니다.",
+          company: "",
+        }),
+      }) as never,
+    );
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      error: "Test emails can only be sent to your own address.",
+    });
+  });
+
   it("rejects cross-origin submissions", async () => {
     const response = await POST(
       new Request("https://buildup.test/api/contact", {

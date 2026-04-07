@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BrandMark } from "@/components/brand-mark";
 
 type LayoutShellProps = {
   children: React.ReactNode;
@@ -31,9 +32,12 @@ export function LayoutShell({ children }: LayoutShellProps) {
       <header className={`flex items-center py-2 ${headerJustifyClassName}`}>
         <Link
           href="/"
-          className="font-display text-2xl font-semibold tracking-[0.18em] text-brand"
+          className="inline-flex items-center gap-3 text-brand"
         >
-          BUILDUP
+          <BrandMark className="h-10 w-10" />
+          <span className="font-display text-2xl font-semibold tracking-[0.18em]">
+            BUILDUP
+          </span>
         </Link>
         {hasHeaderActions ? (
           showContactOnlyAction ? (
