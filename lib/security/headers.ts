@@ -5,9 +5,13 @@ export type SecurityHeader = {
 
 type BuildSecurityHeadersOptions = {
   isDev: boolean;
+  enableInsecureRequestUpgrade?: boolean;
 };
 
-function buildContentSecurityPolicy({ isDev }: BuildSecurityHeadersOptions) {
+function buildContentSecurityPolicy({
+  isDev,
+  enableInsecureRequestUpgrade = false,
+}: BuildSecurityHeadersOptions) {
   const directives = [
     "default-src 'self'",
     "base-uri 'self'",
@@ -21,7 +25,7 @@ function buildContentSecurityPolicy({ isDev }: BuildSecurityHeadersOptions) {
     `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   ];
 
-  if (!isDev) {
+  if (enableInsecureRequestUpgrade) {
     directives.push("upgrade-insecure-requests");
   }
 
@@ -30,6 +34,7 @@ function buildContentSecurityPolicy({ isDev }: BuildSecurityHeadersOptions) {
 
 export function buildSecurityHeaders({
   isDev,
+  enableInsecureRequestUpgrade = false,
 }: BuildSecurityHeadersOptions): SecurityHeader[] {
   return [
     {
@@ -54,7 +59,7 @@ export function buildSecurityHeaders({
     },
     {
       key: "Content-Security-Policy",
-      value: buildContentSecurityPolicy({ isDev }),
+      value: buildContentSecurityPolicy({ isDev, enableInsecureRequestUpgrade }),
     },
   ];
 }

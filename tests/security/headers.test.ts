@@ -25,7 +25,7 @@ describe("security headers", () => {
     );
   });
 
-  it("uses a production-safe CSP by default", () => {
+  it("uses a production-safe CSP without forcing https upgrades locally", () => {
     const csp = getHeaderValue(
       buildSecurityHeaders({ isDev: false }),
       "Content-Security-Policy",
@@ -38,9 +38,9 @@ describe("security headers", () => {
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("style-src 'self' 'unsafe-inline'");
     expect(csp).toContain("connect-src 'self'");
-    expect(csp).toContain("upgrade-insecure-requests");
     expect(csp).toContain("script-src 'self' 'unsafe-inline'");
     expect(csp).not.toContain("'unsafe-eval'");
+    expect(csp).not.toContain("upgrade-insecure-requests");
     expect(csp).not.toContain("http://");
     expect(csp).not.toContain("https://");
   });
@@ -53,5 +53,18 @@ describe("security headers", () => {
 
     expect(csp).toContain("script-src 'self' 'unsafe-inline' 'unsafe-eval'");
     expect(csp).not.toContain("upgrade-insecure-requests");
+  });
+
+  it("adds insecure request upgrades only for trusted https deployments", () => {
+    const csp = getHeaderValue(
+      buildSecurityHeaders({
+        isDev: false,
+        enableInsecureRequestUpgrade: true,
+      }),
+      "Content-Security-Policy",
+    );
+
+    expect(csp).toContain("upgrade-insecure-requests");
+    expect(csp).not.toContain("'unsafe-eval'");
   });
 });

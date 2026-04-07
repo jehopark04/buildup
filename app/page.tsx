@@ -99,12 +99,14 @@ export default function HomePage() {
             개발자를 위한 맞춤형 활동, 스펙업의 기회를 발견하세요.
           </p>
 
-          <Link
-            href="/onboarding"
-            className="mt-8 inline-flex min-w-44 items-center justify-center rounded-[20px] bg-brand px-8 py-4 text-xl font-semibold text-white card-shadow hover:-translate-y-0.5 hover:bg-brand-deep"
-          >
-            시작하기
-          </Link>
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
+            <Link
+              href="/onboarding"
+              className="inline-flex min-w-44 items-center justify-center rounded-[20px] bg-brand px-8 py-4 text-xl font-semibold text-white card-shadow hover:-translate-y-0.5 hover:bg-brand-deep"
+            >
+              시작하기
+            </Link>
+          </div>
         </div>
       </section>
 
