@@ -6,6 +6,9 @@ describe("contact route", () => {
   beforeEach(() => {
     resetContactRateLimitForTest();
     vi.restoreAllMocks();
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     delete process.env.RESEND_API_KEY;
     delete process.env.CONTACT_TO_EMAIL;
     delete process.env.CONTACT_FROM_EMAIL;
@@ -28,6 +31,7 @@ describe("contact route", () => {
     );
 
     expect(response.status).toBe(503);
+    expect(response.headers.get("X-Request-Id")).toBeTruthy();
   });
 
   it("sends email with resend when config is present", async () => {
@@ -57,6 +61,7 @@ describe("contact route", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("X-Request-Id")).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledWith(
       "https://api.resend.com/emails",
       expect.objectContaining({
@@ -117,6 +122,7 @@ describe("contact route", () => {
     );
 
     expect(response.status).toBe(403);
+    expect(response.headers.get("X-Request-Id")).toBeTruthy();
   });
 
   it("rate limits repeated contact submissions", async () => {
@@ -149,5 +155,67 @@ describe("contact route", () => {
     expect((await request()).status).toBe(200);
     expect((await request()).status).toBe(200);
     expect((await request()).status).toBe(429);
+  });
+
+  it("retries once when the email provider returns a 5xx response", async () => {
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.CONTACT_TO_EMAIL = "owner@example.com";
+    process.env.CONTACT_FROM_EMAIL = "BUILDUP <no-reply@example.com>";
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ message: "temporary outage" }), { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "ok" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("https://buildup.test/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          origin: "https://buildup.test",
+          host: "buildup.test",
+          "x-forwarded-for": "127.0.0.1",
+        },
+        body: JSON.stringify({
+          message: "문의 내용을 충분히 길게 적었습니다.",
+          company: "",
+        }),
+      }) as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns 504 after timeout failures exhaust retries", async () => {
+    process.env.RESEND_API_KEY = "re_test_key";
+    process.env.CONTACT_TO_EMAIL = "owner@example.com";
+    process.env.CONTACT_FROM_EMAIL = "BUILDUP <no-reply@example.com>";
+
+    const timeoutError = new Error("timed out");
+    timeoutError.name = "AbortError";
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(timeoutError));
+
+    const response = await POST(
+      new Request("https://buildup.test/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          origin: "https://buildup.test",
+          host: "buildup.test",
+          "x-forwarded-for": "127.0.0.1",
+        },
+        body: JSON.stringify({
+          message: "문의 내용을 충분히 길게 적었습니다.",
+          company: "",
+        }),
+      }) as never,
+    );
+
+    expect(response.status).toBe(504);
+    expect(await response.json()).toEqual({
+      error: "문의 전송이 지연되고 있습니다. 잠시 후 다시 시도해주세요.",
+    });
   });
 });
