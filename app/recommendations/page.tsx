@@ -197,7 +197,7 @@ export default async function RecommendationsPage({
                         tier={activity.finalTier}
                         profileQuery={profileQuery}
                         badgeLabel={isTrackOnlyRecommendation ? "활동 추천" : undefined}
-                        className="w-[320px] shrink-0 snap-start sm:w-[360px]"
+                        className="w-[85vw] max-w-[320px] shrink-0 snap-start sm:w-[360px] sm:max-w-none"
                         presentation={isTrackOnlyRecommendation ? "unified" : "tiered"}
                       />
                     ))}
