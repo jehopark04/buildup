@@ -19,7 +19,7 @@ describe("health route", () => {
     expect(payload).toMatchObject({
       ok: true,
       status: "ok",
-      service: "career-mvp",
+      service: "buildup",
       checks: {
         activityCatalog: "ok",
       },

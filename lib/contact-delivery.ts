@@ -91,7 +91,7 @@ export async function sendContactEmail({
           Authorization: `Bearer ${config.apiKey}`,
           "Content-Type": "application/json",
           "Idempotency-Key": idempotencyKey,
-          "User-Agent": "career-mvp-contact/1.0",
+          "User-Agent": "buildup-contact/1.0",
           "X-Request-Id": requestId,
         },
         body: JSON.stringify({

@@ -9,7 +9,7 @@ function getHealthStatus() {
   return {
     ok: catalogLoaded,
     status: catalogLoaded ? "ok" : "error",
-    service: "career-mvp",
+    service: "buildup",
     timestamp: new Date().toISOString(),
     checks: {
       activityCatalog: catalogLoaded ? "ok" : "empty",

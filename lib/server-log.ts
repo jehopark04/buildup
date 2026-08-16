@@ -29,7 +29,7 @@ function writeLog(level: LogLevel, event: string, context: LogContext) {
     timestamp: new Date().toISOString(),
     level,
     event,
-    service: "career-mvp",
+    service: "buildup",
     ...context,
   });
   const message = JSON.stringify(payload);

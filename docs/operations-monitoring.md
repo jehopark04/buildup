@@ -46,8 +46,8 @@ Example response:
 {
   "ok": true,
   "status": "ok",
-  "service": "career-mvp",
-  "timestamp": "2025-04-07T07:00:00.000Z",
+  "service": "buildup",
+  "timestamp": "2026-04-07T07:00:00.000Z",
   "checks": {
     "activityCatalog": "ok"
   }
